@@ -62,7 +62,7 @@
 }
 
 .modal-content .btn-submit {
-    background: #00D1F9;
+    background: #00b8dd;
     color: white;
     border: none;
     font-weight: 500;
@@ -72,7 +72,7 @@
 }
 
 .modal-content .btn-submit:hover {
-    background: #00b8dd;
+    background: #035666;
 }
 
 /* Login Modal Styles */
@@ -174,3 +174,7 @@
 .register-modal .form-label {
     font-size: 0.95rem;
 } 
+.modal-backdrop {
+    backdrop-filter: blur(90px);
+    -webkit-backdrop-filter: blur(90px);
+}
