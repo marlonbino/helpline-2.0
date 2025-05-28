@@ -1,0 +1,176 @@
+/* Modal Common Styles */
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    margin: auto;
+}
+
+/* Common Modal Header Styles */
+.modal-content .modal-header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.2rem;
+    padding: 0 0.5rem;
+}
+
+.modal-content .modal-title {
+    color: #00D1F9;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+    font-weight: 600;
+}
+
+.modal-content .modal-subtitle {
+    color: #6c757d;
+    line-height: 1.3;
+    max-width: 260px;
+    margin: 0 auto;
+}
+
+/* Common Form Styles */
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.modal-content .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.modal-content .form-label {
+    color: #333;
+    font-weight: 500;
+}
+
+.modal-content .form-control {
+    width: 100%;
+    border: 1px solid #ccc;
+    transition: border-color 0.2s ease;
+}
+
+.modal-content .form-control:focus {
+    outline: none;
+    border-color: #00D1F9;
+    box-shadow: 0 0 0 2px rgba(0, 209, 249, 0.1);
+}
+
+.modal-content .btn-submit {
+    background: #00D1F9;
+    color: white;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.2s ease;
+}
+
+.modal-content .btn-submit:hover {
+    background: #00b8dd;
+}
+
+/* Login Modal Styles */
+.login-modal {
+    max-width: 380px;
+    padding: 1.8rem;
+}
+
+.login-modal .modal-title {
+    font-size: 1.8rem;
+}
+
+.login-modal .modal-subtitle {
+    font-size: 1rem;
+}
+
+.login-modal .form-label {
+    font-size: 1rem;
+}
+
+.login-modal .form-control {
+    padding: 0.7rem 1rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.login-modal .remember-me {
+    margin: -0.3rem 0 0.3rem 0;
+    font-size: 0.95rem;
+}
+
+.login-modal .remember-me input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.login-modal .btn-submit {
+    padding: 0.7rem;
+    margin-top: 0.3rem;
+}
+
+.login-modal .forgot-password {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+}
+
+.login-modal .forgot-password a {
+    color: #00D1F9;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.login-modal .forgot-password a:hover {
+    color: #00b8dd;
+}
+
+/* Register Modal Styles */
+.register-modal {
+    max-width: 380px;
+    padding: 1.8rem;
+}
+
+.register-modal .modal-header {
+    margin-bottom: 1.2rem;
+}
+
+.register-modal .form-group {
+    margin-bottom: 0.1rem;
+}
+
+.register-modal .form-control {
+    padding: 0.65rem 1rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.register-modal .btn-submit {
+    padding: 0.7rem;
+    margin-top: 0.2rem;
+}
+
+.register-modal .sign-in-link {
+    margin-top: 0.8rem;
+    font-size: 0.95rem;
+}
+
+.register-modal .modal-title {
+    font-size: 2rem;
+}
+
+.register-modal .modal-subtitle {
+    font-size: 1.1rem;
+}
+
+.register-modal .form-label {
+    font-size: 0.95rem;
+} 
