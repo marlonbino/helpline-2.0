@@ -1,0 +1,314 @@
+{% extends "dashboard.html" %}
+
+{% block page_content %}
+<style>
+    /* Styles extracted and adapted for the user form section */
+    .form-section {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 30px;
+        margin-bottom: 30px;
+        /* max-width: 800px; /* Optional: to constrain width if needed */
+        /* margin: 0 auto;    /* Optional: to center if max-width is used */
+    }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        background-color: #fff; 
+        color: #334155; 
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .btn { 
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex; 
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none; 
+    }
+
+    .btn-primary {
+        background: #3b82f6;
+        color: white;
+        width: 100%; 
+    }
+
+    .btn-primary:hover {
+        background: #2563eb;
+        transform: translateY(-1px);
+    }
+
+    .alert {
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .alert-success {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+
+    .alert-error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 25px;
+    }
+
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="form-section">
+    <div class="section-title">
+        ➕ Add New User
+    </div>
+    
+    <div class="alert alert-success hidden" id="successAlert">
+        ✅ User added successfully!
+    </div>
+    
+    <div class="alert alert-error hidden" id="errorAlert">
+        ❌ Please fill in all required fields.
+    </div>
+
+    <form id="userForm">
+        <div class="form-grid" id="dynamicFields">
+            <!-- Dynamic fields will be generated here -->
+        </div>
+        
+        <div class="actions">
+            <button type="submit" class="btn btn-primary">
+                💾 Save User
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    let userFormConfig = [
+        { name: 'Full Name', type: 'text', required: true, id: 'fullName' },
+        { name: 'Email', type: 'email', required: true, id: 'email' },
+        { name: 'Phone Number', type: 'tel', required: true, id: 'phoneNumber' },
+        { name: 'Role', type: 'select', required: true, id: 'role', options: ['Admin', 'Counselor', 'Supervisor', 'Data Entry'] },
+        { name: 'Department', type: 'select', required: true, id: 'department', options: ['Child Protection', 'GBV Support', 'Mental Health', 'Family Services', 'Administration'] },
+        { name: 'Hire Date', type: 'date', required: true, id: 'hireDate' },
+        { name: 'Employee ID', type: 'text', required: false, id: 'employeeId' },
+        { name: 'Notes', type: 'textarea', required: false, id: 'notes' }
+    ];
+
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+
+    const savedConfig = localStorage.getItem('usersFormConfig');
+    if (savedConfig) {
+        try {
+            userFormConfig = JSON.parse(savedConfig);
+        } catch (e) {
+            console.error('Error parsing saved userFormConfig from localStorage:', e);
+        }
+    }
+    
+    generateForm();
+    setupFormHandler();
+
+    function generateForm() {
+        const container = document.getElementById('dynamicFields');
+        if (!container) {
+            console.error('Error: dynamicFields container not found.');
+            return;
+        }
+        container.innerHTML = '';
+
+        userFormConfig.forEach(field => {
+            const formGroup = document.createElement('div');
+            formGroup.className = 'form-group';
+            
+            if (field.type === 'textarea' || (field.name && field.name.toLowerCase().includes('note'))) {
+                formGroup.classList.add('full-width');
+            }
+
+            let inputHtml = '';
+            const requiredAttr = field.required ? 'required' : '';
+            const requiredLabel = field.required ? ' <span style="color:red;">*</span>' : '';
+
+            switch (field.type) {
+                case 'text':
+                case 'email':
+                case 'tel':
+                case 'date':
+                case 'number':
+                    inputHtml = `<input type="${field.type}" class="form-input" name="${field.id}" id="${field.id}" ${requiredAttr}>`;
+                    break;
+                case 'textarea':
+                    inputHtml = `<textarea class="form-textarea" name="${field.id}" id="${field.id}" ${requiredAttr}></textarea>`;
+                    break;
+                case 'select':
+                    let optionsHtml = '<option value="">Select...</option>';
+                    if (field.options && Array.isArray(field.options)) {
+                        optionsHtml += field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+                    }
+                    inputHtml = `<select class="form-select" name="${field.id}" id="${field.id}" ${requiredAttr}>${optionsHtml}</select>`;
+                    break;
+                default:
+                    console.warn('Unknown field type:', field.type);
+                    inputHtml = `<span>Unsupported field type: ${field.type}</span>`;
+            }
+
+            formGroup.innerHTML = `
+                <label class="form-label" for="${field.id}">${field.name}${requiredLabel}</label>
+                ${inputHtml}
+            `;
+            container.appendChild(formGroup);
+        });
+    }
+
+    function setupFormHandler() {
+        const userForm = document.getElementById('userForm');
+        if (!userForm) {
+            console.error('Error: userForm not found.');
+            return;
+        }
+        userForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const userData = {};
+            let isValid = true;
+
+            userFormConfig.forEach(field => {
+                const value = formData.get(field.id);
+                userData[field.id] = value;
+                
+                const inputElement = document.getElementById(field.id);
+                if (field.required && (!value || String(value).trim() === '')) {
+                    isValid = false;
+                    if (inputElement) inputElement.style.borderColor = 'red';
+                } else {
+                    if (inputElement) inputElement.style.borderColor = '#e2e8f0';
+                }
+            });
+
+            if (!isValid) {
+                showAlert('errorAlert', '❌ Please fill in all required fields.');
+                return;
+            }
+
+            userData.id = String(Date.now());
+            const nowISO = new Date().toISOString();
+            userData.createdAt = nowISO;
+            userData.updatedAt = nowISO;
+
+            users.push(userData);
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            showAlert('successAlert', '✅ User added successfully!');
+            e.target.reset();
+            userFormConfig.forEach(field => {
+                 const inputElement = document.getElementById(field.id);
+                 if (inputElement) inputElement.style.borderColor = '#e2e8f0';
+            });
+            
+            setTimeout(() => {
+                console.log('User saved. Would typically redirect to users table or dashboard.');
+                // Example: window.location.href = "{{ url_for('dashboard') }}";
+            }, 1500);
+        });
+    }
+
+    function showAlert(alertId, message) {
+        document.querySelectorAll('.alert').forEach(alert => {
+            alert.classList.add('hidden');
+        });
+        
+        const alertElement = document.getElementById(alertId);
+        if (alertElement) {
+            if (message) {
+                // Safely set text content
+                alertElement.textContent = ''; // Clear previous content
+                alertElement.appendChild(document.createTextNode(message));
+            }
+            alertElement.classList.remove('hidden');
+            setTimeout(() => {
+                alertElement.classList.add('hidden');
+            }, 3000);
+        } else {
+            console.error('Error: Alert element with ID ' + alertId + ' not found.');
+        }
+    }
+})();
+</script>
+{% endblock page_content %}

@@ -1,0 +1,585 @@
+{% extends "dashboard.html" %}
+
+{% block page_content %}
+<style>
+    /* Styles for call-table, aligned with table_users.html */
+    .call-table-container { 
+        max-width: 100%; 
+        margin: 0 auto;
+        padding: 0; 
+    }
+
+    .call-table-controls { 
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        gap: 20px;
+        flex-wrap: wrap; 
+    }
+
+    .call-table-search-box { 
+        display: flex;
+        align-items: center;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 10px 15px;
+        flex: 1;
+        min-width: 250px; 
+    }
+
+    .call-table-search-input { 
+        border: none;
+        outline: none;
+        flex: 1;
+        font-size: 14px;
+        background-color: #fff; 
+        color: #334155; 
+    }
+    /* Added search icon style for consistency if an icon is used */
+    .call-table-search-icon {
+        margin-right: 8px;
+        color: #9ca3af;
+    }
+
+    .call-table-filter-select { 
+        padding: 10px 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: white;
+        font-size: 14px;
+        min-width: 150px; 
+        background-color: #fff;
+        color: #334155;
+    }
+    
+    .call-table-add-button-container { 
+        margin-bottom: 25px;
+        text-align: right; 
+    }
+    /* Add button style aligned with user table's add button */
+    .call-table-add-button {
+        padding: 10px 20px;
+        background-color: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600; /* User table uses 600 */
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background-color 0.2s, transform 0.2s;
+    }
+    .call-table-add-button:hover { 
+        background-color: #2563eb; 
+        transform: translateY(-1px);
+    }
+
+    .call-table-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .call-table-stat-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 20px;
+        text-align: center; /* User table stat cards are centered */
+        /* box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* User table stat cards don't have this specific shadow */
+    }
+
+    .call-table-stat-number {
+        font-size: 32px; /* User table uses 32px */
+        font-weight: 700; /* User table uses 700 */
+        color: #3b82f6;
+        margin-bottom: 5px;
+    }
+
+    .call-table-stat-label {
+        font-size: 14px;
+        color: #64748b;
+        font-weight: 500; /* User table uses 500 */
+    }
+
+    .call-table-section { /* Renamed from .table-section in user table */
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        overflow: hidden; /* User table uses overflow:hidden for rounded corners on table */
+        /* box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* User table doesn't have this specific shadow */
+    }
+
+    .call-table-scroll-wrapper {
+        overflow-x: auto;
+        width: 100%;
+    }
+
+    .call-table-header { /* Equivalent to .table-header in user table */
+        padding: 20px 25px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between; 
+        align-items: center;
+    }
+
+    .call-table-title { /* Equivalent to .table-title in user table */
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937; /* User table uses #1f2937 */
+    }
+
+    .call-table {
+        width: 100%;
+        border-collapse: collapse; /* User table uses collapse */
+        /* border-spacing: 0; /* User table uses this with border-collapse */
+    }
+
+    .call-table th, .call-table td {
+        padding: 16px 25px; /* User table uses 16px 25px */
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0; 
+        font-size: 14px;
+        color: #374151; /* User table uses #374151 for td */
+        white-space: nowrap; /* Prevent text wrapping for even rows */
+    }
+
+    .call-table th {
+        background-color: #f9fafb; /* User table uses #f9fafb */
+        font-weight: 600; 
+        color: #4b5563; /* User table uses #4b5563 for th */
+        text-transform: uppercase;
+        letter-spacing: 0.05em; /* User table uses 0.05em */
+    }
+
+    .call-table tbody tr:hover {
+        background-color: #f3f4f6; /* User table uses #f3f4f6 */
+    }
+
+    .call-table-actions button, .call-table-actions a {
+        margin-right: 8px;
+        padding: 8px 12px; /* User table action buttons are larger */
+        font-size: 14px; /* User table action buttons font size */
+        border-radius: 6px;
+        border: 1px solid transparent;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+    .call-table-actions .edit-btn {
+        background-color: #e0f2fe; 
+        color: #0ea5e9;
+        /* border-color: #bae6fd; /* Not in user table */
+    }
+    .call-table-actions .edit-btn:hover { background-color: #bae6fd; color: #0c85b6; }
+    .call-table-actions .delete-btn {
+        background-color: #fee2e2; 
+        color: #ef4444;
+        /* border-color: #fecaca; /* Not in user table */
+    }
+    .call-table-actions .delete-btn:hover { background-color: #fecaca; color: #dc2626; }
+
+    .call-table-pagination {
+        padding: 20px 25px;
+        text-align: center; /* User table pagination is centered */
+        border-top: 1px solid #e2e8f0;
+        background-color: #fff; /* User table pagination has white background */
+    }
+
+    .call-table-pagination button {
+        margin: 0 4px; /* User table uses 4px */
+        padding: 8px 16px; /* User table uses 8px 16px */
+        border: 1px solid #e2e8f0;
+        background-color: white;
+        color: #374151; /* User table uses #374151 */
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        font-size: 14px; /* User table pagination font size */
+        font-weight: 500;
+    }
+
+    .call-table-pagination button:hover:not(:disabled) {
+        background-color: #f3f4f6; /* User table hover */
+        border-color: #d1d5db;
+        color: #1f2937;
+    }
+
+    .call-table-pagination button:disabled {
+        color: #9ca3af;
+        cursor: not-allowed;
+        background-color: #f9fafb; /* User table disabled */
+        border-color: #e5e7eb;
+    }
+
+    .call-table-pagination .active {
+        background-color: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+    .call-table-pagination .active:hover {
+        background-color: #2563eb;
+        border-color: #2563eb;
+    }
+
+    .call-table-badge {
+        padding: 5px 12px; /* User table badges are larger */
+        border-radius: 16px; /* User table badges are more rounded */
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: capitalize;
+        display: inline-block; /* Ensures padding is respected */
+    }
+    /* Badge colors aligned with a common palette, similar to user table if applicable */
+    .call-table-badge-open       { background-color: #ccfbf1; color: #134e4a; } /* Darker Teal text */
+    .call-table-badge-in-progress{ background-color: #cffafe; color: #155e75; } /* Darker Cyan text */
+    .call-table-badge-resolved   { background-color: #dcfce7; color: #166534; } /* Darker Green text */
+    .call-table-badge-closed     { background-color: #e2e8f0; color: #334155; } /* Darker Slate text */
+    .call-table-badge-missed     { background-color: #fee2e2; color: #991b1b; } /* Darker Red text */
+    .call-table-badge-follow-up  { background-color: #ffedd5; color: #9a3412; } /* Darker Orange text */
+    .call-table-badge-default    { background-color: #e5e7eb; color: #374151; } /* Darker Gray text */
+
+    .call-table-alert {
+        padding: 15px 20px;
+        margin-bottom: 25px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        text-align: center;
+    }
+    .call-table-alert-success { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+    .call-table-alert-danger { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+
+    @media (max-width: 768px) {
+        .call-table-controls { /* Matched from user table */
+            flex-direction: column;
+            align-items: stretch;
+        }
+        /* .call-table-search-filter-container - not explicitly in user table, but covered by .call-table-controls */
+        .call-table-filter-select,
+        .call-table-search-box {
+            min-width: 100%; /* Matched from user table */
+            width: 100%;
+        }
+        .call-table-add-button-container { /* Ensure button is full width on mobile */
+             text-align: center; /* Center the button if it's not full width by default */
+        }
+        .call-table-add-button {
+            width: 100%;
+            justify-content: center;
+        }
+        .call-table th, .call-table td {
+            padding: 12px 15px; /* User table uses 12px 15px on mobile */
+            font-size: 13px;
+        }
+        .call-table-actions button, .call-table-actions a {
+            padding: 6px 10px; /* User table uses 6px 10px on mobile */
+            font-size: 12px;
+            margin-bottom: 5px; /* Stack buttons on mobile */
+            display: block; /* Make buttons block for stacking */
+            width: 100%;
+            text-align: center;
+        }
+        .call-table-actions button:last-child, .call-table-actions a:last-child {
+            margin-right: 0;
+            margin-bottom: 0;
+        }
+    }
+</style>
+
+<div class="call-table-container-wrapper">
+    <div class="call-table-stats">
+        <div class="call-table-stat-card">
+            <div class="call-table-stat-number" id="totalCalls">0</div>
+            <div class="call-table-stat-label">Total Calls</div>
+        </div>
+        <div class="call-table-stat-card">
+            <div class="call-table-stat-number" id="openCalls">0</div>
+            <div class="call-table-stat-label">Open/In Progress</div>
+        </div>
+        <div class="call-table-stat-card">
+            <div class="call-table-stat-number" id="callsToday">0</div>
+            <div class="call-table-stat-label">Calls Logged Today</div>
+        </div>
+    </div>
+
+    <div class="call-table-controls">
+        <div class="call-table-search-box">
+            <span>🔍</span>
+            <input type="text" class="call-table-search-input" placeholder="Search calls..." id="callSearchInput">
+        </div>
+        <select class="call-table-filter-select" id="callTypeFilter">
+            <option value="">All Call Types</option>
+        </select>
+        <select class="call-table-filter-select" id="callStatusFilter">
+            <option value="">All Statuses</option>
+        </select>
+    </div>
+
+    <div class="call-table-section">
+        <div class="call-table-header-bar">
+            <div class="call-table-title">Call Logs</div>
+            <a href="{{ url_for('calls_form') }}" class="call-table-add-button">➕ Add New Call</a>
+        </div>
+        <div class="call-table-scroll-wrapper">
+            <table class="call-table" id="callsTable">
+                    <thead id="callTableHeader">
+                        <!-- Dynamic headers will be generated here -->
+                    </thead>
+                    <tbody id="callTableBody">
+                    <!-- Dynamic headers will be generated here -->
+                </thead>
+                <tbody id="callTableBody">
+                    <!-- Dynamic rows will be generated here -->
+                </tbody>
+            </table>
+            <div class="call-table-empty-state call-table-hidden" id="callEmptyState">
+                <div class="call-table-empty-icon">📞</div>
+                <h3>No calls found</h3>
+                <p>Start by logging your first call to the system.</p>
+                <a href="{{ url_for('calls_form') }}" class="call-table-btn call-table-btn-primary" style="margin-top: 15px;">➕ Log First Call</a>
+            </div>
+        </div>
+        
+        <div class="call-table-pagination" id="callPagination">
+            <!-- Pagination will be generated here -->
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    const callColumnConfig = [
+        // Fields from callFormConfig with tableVisible property
+        { name: 'Caller Name', id: 'callerName', tableVisible: true },
+        { name: 'Caller Phone', id: 'callerPhone', tableVisible: true },
+        { name: 'Call Date', id: 'callDate', type: 'date', tableVisible: true },
+        { name: 'Call Time', id: 'callTime', type: 'time', tableVisible: true },
+        { name: 'Call Type', id: 'callType', tableVisible: true },
+        { name: 'Status', id: 'callStatus', tableVisible: true }, // Renamed 'name' for header
+        { name: 'Assigned To', id: 'assignedTo', tableVisible: true },
+        { name: 'Duration (Mins)', id: 'callDuration', tableVisible: true },
+        // Fields not typically in table but part of data model
+        { name: 'Related Case ID', id: 'relatedCaseId', tableVisible: false },
+        { name: 'Call Summary', id: 'callSummary', tableVisible: false }
+    ];
+
+    let allCalls = [];
+    let filteredCalls = [];
+    let currentPage = 1;
+    const callsPerPage = 10;
+
+    let searchInput, typeFilter, statusFilter, tableHeader, tableBody, emptyState, paginationContainer;
+    let totalCallsEl, openCallsEl, callsTodayEl;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        searchInput = document.getElementById('callSearchInput');
+        typeFilter = document.getElementById('callTypeFilter');
+        statusFilter = document.getElementById('callStatusFilter');
+        tableHeader = document.getElementById('callTableHeader');
+        tableBody = document.getElementById('callTableBody');
+        emptyState = document.getElementById('callEmptyState');
+        paginationContainer = document.getElementById('callPagination');
+        totalCallsEl = document.getElementById('totalCalls');
+        openCallsEl = document.getElementById('openCalls');
+        callsTodayEl = document.getElementById('callsToday');
+
+        if (!tableBody) { console.error("Call table body not found."); return; }
+        
+        loadCallsData();
+        populateFilterDropdowns();
+        generateTableHeaders();
+        updateStats();
+        filterAndRenderCalls();
+        setupEventListeners();
+    });
+
+    function loadCallsData() {
+        const storedCalls = localStorage.getItem('calls');
+        allCalls = storedCalls ? JSON.parse(storedCalls) : [];
+        filteredCalls = [...allCalls];
+    }
+
+    function populateFilterDropdowns() {
+        // Populate Call Type filter
+        const callTypes = ['Inquiry', 'Support Request', 'Sales Lead', 'Complaint', 'Follow-up', 'Other']; // From form config
+        callTypes.forEach(ct => typeFilter.add(new Option(ct, ct)));
+
+        // Populate Call Status filter
+        const callStatuses = ['Open', 'In Progress', 'Resolved', 'Missed', 'Voicemail Left', 'Scheduled Callback']; // From form config
+        callStatuses.forEach(cs => statusFilter.add(new Option(cs, cs)));
+    }
+
+    function setupEventListeners() {
+        if (searchInput) searchInput.addEventListener('input', () => { currentPage = 1; filterAndRenderCalls(); });
+        if (typeFilter) typeFilter.addEventListener('change', () => { currentPage = 1; filterAndRenderCalls(); });
+        if (statusFilter) statusFilter.addEventListener('change', () => { currentPage = 1; filterAndRenderCalls(); });
+    }
+
+    function generateTableHeaders() {
+        let headersHtml = '<tr>';
+        callColumnConfig.forEach(col => {
+            if (col.tableVisible) {
+                headersHtml += `<th>${col.name}</th>`;
+            }
+        });
+        headersHtml += '<th>Actions</th></tr>';
+        tableHeader.innerHTML = headersHtml;
+    }
+
+    function getStatusBadgeClass(status) {
+        if (!status) return '';
+        const s = status.toLowerCase().replace(/\s+/g, '-');
+        return `call-table-badge-${s}`;
+    }
+
+    function renderTable() {
+        tableBody.innerHTML = '';
+        if (filteredCalls.length === 0) {
+            emptyState.classList.remove('call-table-hidden');
+            tableBody.classList.add('call-table-hidden');
+            paginationContainer.classList.add('call-table-hidden');
+            return;
+        }
+        emptyState.classList.add('call-table-hidden');
+        tableBody.classList.remove('call-table-hidden');
+        paginationContainer.classList.remove('call-table-hidden');
+
+        const startIndex = (currentPage - 1) * callsPerPage;
+        const endIndex = startIndex + callsPerPage;
+        const paginatedCalls = filteredCalls.slice(startIndex, endIndex);
+
+        paginatedCalls.forEach(call => {
+            const row = tableBody.insertRow();
+            callColumnConfig.forEach(col => {
+                if (col.tableVisible) {
+                    const cell = row.insertCell();
+                    let cellValue = call[col.id] || '';
+                    if (col.id === 'callStatus') {
+                        cell.innerHTML = `<span class="call-table-badge ${getStatusBadgeClass(cellValue)}">${cellValue}</span>`;
+                    } else if (col.type === 'date' && cellValue) {
+                        cell.textContent = new Date(cellValue).toLocaleDateString();
+                    } else {
+                        cell.textContent = cellValue;
+                    }
+                }
+            });
+
+            // Actions cell
+            const actionsCell = row.insertCell();
+            actionsCell.className = 'call-table-actions';
+            const editButton = document.createElement('a');
+            editButton.href = `{{ url_for('calls_form') }}?edit_id=${call.id}`;
+            editButton.className = 'call-table-btn call-table-btn-primary';
+            editButton.innerHTML = '✏️ Edit';
+            actionsCell.appendChild(editButton);
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'call-table-btn call-table-btn-danger';
+            deleteButton.innerHTML = '🗑️ Delete';
+            deleteButton.onclick = () => deleteCall(call.id);
+            actionsCell.appendChild(deleteButton);
+        });
+        renderPagination();
+    }
+
+    function filterAndRenderCalls() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedType = typeFilter.value;
+        const selectedStatus = statusFilter.value;
+
+        filteredCalls = allCalls.filter(call => {
+            const matchesSearch = Object.values(call).some(val => 
+                String(val).toLowerCase().includes(searchTerm)
+            );
+            const matchesType = selectedType ? call.callType === selectedType : true;
+            const matchesStatus = selectedStatus ? call.callStatus === selectedStatus : true;
+            return matchesSearch && matchesType && matchesStatus;
+        });
+        updateStats();
+        renderTable();
+    }
+
+    function updateStats() {
+        totalCallsEl.textContent = allCalls.length;
+        const openInProgressCalls = allCalls.filter(c => c.callStatus === 'Open' || c.callStatus === 'In Progress').length;
+        openCallsEl.textContent = openInProgressCalls;
+
+        const today = new Date().toISOString().split('T')[0];
+        const loggedToday = allCalls.filter(c => c.callDate === today).length;
+        callsTodayEl.textContent = loggedToday;
+    }
+
+    function deleteCall(callId) {
+        if (confirm('Are you sure you want to delete this call log?')) {
+            allCalls = allCalls.filter(c => String(c.id) !== String(callId));
+            localStorage.setItem('calls', JSON.stringify(allCalls));
+            currentPage = 1; // Reset to first page
+            filterAndRenderCalls(); // Reload and re-render
+            showAlert('Call log deleted successfully.', 'success');
+        }
+    }
+    
+    // Basic alert function (can be enhanced)
+    function showAlert(message, type = 'success') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `call-table-alert call-table-alert-${type}`;
+        alertDiv.textContent = message;
+        // Simple way to display: prepend to wrapper, auto-remove
+        const wrapper = document.querySelector('.call-table-container-wrapper');
+        if (wrapper) {
+            wrapper.insertBefore(alertDiv, wrapper.firstChild);
+            setTimeout(() => { alertDiv.remove(); }, 3000);
+        } else {
+            console.log(`Call Table Alert (${type}): ${message}`);
+        }
+    }
+
+    function renderPagination() {
+        paginationContainer.innerHTML = '';
+        const totalPages = Math.ceil(filteredCalls.length / callsPerPage);
+        if (totalPages <= 1) return;
+
+        // Previous Button
+        const prevButton = document.createElement('button');
+        prevButton.textContent = '« Prev';
+        prevButton.className = 'call-table-page-btn';
+        prevButton.disabled = currentPage === 1;
+        prevButton.onclick = () => { currentPage--; renderTable(); };
+        paginationContainer.appendChild(prevButton);
+
+        // Page Numbers (simplified: show current and a few around it)
+        for (let i = 1; i <= totalPages; i++) {
+            // Simple pagination: show all page numbers
+            // For more complex scenarios, you might want to show '...' for many pages
+            const pageButton = document.createElement('button');
+            pageButton.textContent = i;
+            pageButton.className = 'call-table-page-btn';
+            if (i === currentPage) pageButton.classList.add('active');
+            pageButton.onclick = () => { currentPage = i; renderTable(); };
+            paginationContainer.appendChild(pageButton);
+        }
+
+        // Next Button
+        const nextButton = document.createElement('button');
+        nextButton.textContent = 'Next »';
+        nextButton.className = 'call-table-page-btn';
+        nextButton.disabled = currentPage === totalPages;
+        nextButton.onclick = () => { currentPage++; renderTable(); };
+        paginationContainer.appendChild(nextButton);
+    }
+
+    // Expose functions if needed for other scripts or debugging
+    // window.helplineCallsTable = { reloadData: filterAndRenderCalls }; 
+
+})();
+</script>
+{% endblock page_content %}

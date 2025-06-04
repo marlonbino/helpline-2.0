@@ -115,7 +115,7 @@
                 <p class="modal-subtitle">Please sign in to continue to the dashboard</p>
             </div>
 
-            <form id="loginForm" method="POST">
+            <form id="loginForm" method="POST" action="{{ url_for('login') }}">
                 <div class="form-group">
                     <label for="username" class="form-label">Username</label>
                     <input type="text" id="username" name="username" class="form-control" required autocomplete="username">
@@ -302,9 +302,9 @@
         var loginForm = document.getElementById('loginForm');
         if (loginForm) {
             loginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                // You can add AJAX login logic here
-                alert('Login button clicked!');
+                // e.preventDefault(); // Removed to allow normal form submission
+                // You can add AJAX login logic here if needed, or let the form submit normally
+                // alert('Login button clicked!'); // Removed alert
             });
         }
     });

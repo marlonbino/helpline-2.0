@@ -1,0 +1,526 @@
+{% extends "dashboard.html" %}
+
+{% block page_content %}
+<style>
+    /* Styles extracted and adapted for the user table section */
+    .user-table-container { 
+        max-width: 100%; 
+        margin: 0 auto;
+        padding: 0; 
+    }
+
+    .user-table-controls { 
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        gap: 20px;
+        flex-wrap: wrap; 
+    }
+
+    .user-table-search-box { 
+        display: flex;
+        align-items: center;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 10px 15px;
+        flex: 1;
+        min-width: 250px; 
+    }
+
+    .user-table-search-input { 
+        border: none;
+        outline: none;
+        flex: 1;
+        font-size: 14px;
+        background-color: #fff; 
+        color: #334155; 
+    }
+
+    .user-table-filter-select { 
+        padding: 10px 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: white;
+        font-size: 14px;
+        min-width: 150px; 
+        background-color: #fff;
+        color: #334155;
+    }
+    
+    .user-table-add-button-container { 
+        margin-bottom: 25px;
+        text-align: right; 
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 32px;
+        font-weight: 700;
+        color: #3b82f6;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .table-section {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+    }
+
+    .table-header { 
+        padding: 20px 25px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between; 
+        align-items: center;
+    }
+
+    .table-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 15px 20px;
+        text-align: left;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 14px; 
+    }
+
+    th {
+        background: #f8fafc;
+        font-weight: 600;
+        color: #374151;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    tr:hover {
+        background: #f8fafc;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-primary { background: #dbeafe; color: #1d4ed8; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-secondary { background: #f1f5f9; color: #475569; }
+
+    .actions { 
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn { 
+        padding: 6px 12px;
+        border: none;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .btn.add-user-btn { 
+        background: #059669;
+        color: white;
+        padding: 10px 20px; 
+        font-size: 14px;
+    }
+    .btn.add-user-btn:hover {
+        background: #047857;
+    }
+
+    .btn-sm { padding: 4px 8px; font-size: 11px; }
+    .btn-primary { background: #3b82f6; color: white; } 
+    .btn-primary:hover { background: #2563eb; }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-secondary { background: #6b7280; color: white; } 
+    .btn-secondary:hover { background: #4b5563; }
+
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #64748b;
+    }
+
+    .empty-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        padding: 20px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .page-btn {
+        padding: 8px 12px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        color: #374151;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+
+    .page-btn:hover { background: #f8fafc; }
+    .page-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+    .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    @media (max-width: 768px) {
+        .user-table-controls {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .user-table-search-box { max-width: none; }
+        .stats { grid-template-columns: 1fr; } 
+        .table-container { font-size: 13px; } 
+        th, td { padding: 12px 15px; }
+        .actions .btn { font-size: 11px; padding: 5px 8px; } 
+    }
+</style>
+
+<div class="user-table-container">
+
+    <div class="user-table-add-button-container">
+        <a href="{{ url_for('users_form') }}" class="btn add-user-btn">➕ Add User</a>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-number" id="totalUsers">0</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="activeUsers">0</div>
+            <div class="stat-label">Active Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="newThisMonth">0</div>
+            <div class="stat-label">New This Month</div>
+        </div>
+    </div>
+
+    <div class="user-table-controls">
+        <div class="user-table-search-box">
+            <span>🔍</span>
+            <input type="text" class="user-table-search-input" placeholder="Search users..." id="searchInput">
+        </div>
+        <select class="user-table-filter-select" id="roleFilter">
+            <option value="">All Roles</option>
+        </select>
+        <select class="user-table-filter-select" id="departmentFilter">
+            <option value="">All Departments</option>
+        </select>
+    </div>
+
+    <div class="table-section">
+        <div class="table-header">
+            <div class="table-title">User Management</div>
+        </div>
+        
+        <div class="table-container">
+            <table id="usersTable">
+                <thead id="tableHeader">
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+            
+            <div class="empty-state hidden" id="emptyState">
+                <div class="empty-icon">👥</div>
+                <h3>No users found</h3>
+                <p>Start by adding your first user to the system.</p>
+                <a href="{{ url_for('users_form') }}" class="btn btn-primary" style="margin-top: 15px;">➕ Add First User</a>
+            </div>
+        </div>
+        
+        <div class="pagination" id="pagination">
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    let userFormConfig = [
+        { name: 'Full Name', type: 'text', required: true, id: 'fullName' },
+        { name: 'Email', type: 'email', required: true, id: 'email' },
+        { name: 'Phone Number', type: 'tel', required: true, id: 'phoneNumber' },
+        { name: 'Role', type: 'select', required: true, id: 'role', options: ['Admin', 'Counselor', 'Supervisor', 'Data Entry'] },
+        { name: 'Department', type: 'select', required: true, id: 'department', options: ['Child Protection', 'GBV Support', 'Mental Health', 'Family Services', 'Administration'] },
+        { name: 'Hire Date', type: 'date', required: true, id: 'hireDate' }
+    ];
+    
+    const savedFormConfig = localStorage.getItem('usersFormConfig');
+    if (savedFormConfig) {
+        try {
+            userFormConfig = JSON.parse(savedFormConfig);
+        } catch (e) {
+            console.error("Error parsing usersFormConfig from localStorage:", e);
+        }
+    }
+
+    let users = [];
+    let filteredUsers = [];
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+    let searchInput, roleFilter, departmentFilter, tableHeader, tableBody, emptyState, paginationContainer;
+    let totalUsersEl, activeUsersEl, newThisMonthEl;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        searchInput = document.getElementById('searchInput');
+        roleFilter = document.getElementById('roleFilter');
+        departmentFilter = document.getElementById('departmentFilter');
+        tableHeader = document.getElementById('tableHeader');
+        tableBody = document.getElementById('tableBody');
+        emptyState = document.getElementById('emptyState');
+        paginationContainer = document.getElementById('pagination');
+        totalUsersEl = document.getElementById('totalUsers');
+        activeUsersEl = document.getElementById('activeUsers');
+        newThisMonthEl = document.getElementById('newThisMonth');
+
+        if (!tableBody) { 
+            console.error("Table body not found. Aborting script.");
+            return;
+        }
+        
+        loadUsers(); 
+        populateFilterDropdowns();
+        generateTableHeaders();
+        updateStats();
+        filterAndRender(); 
+        setupEventListeners();
+    });
+
+    function loadUsers() {
+        const storedUsers = localStorage.getItem('users');
+        users = storedUsers ? JSON.parse(storedUsers) : [];
+        filteredUsers = [...users];
+    }
+    
+    function populateFilterDropdowns() {
+        if (roleFilter) {
+            const roles = [...new Set(users.map(user => user.role).filter(Boolean))].sort();
+            roles.forEach(role => {
+                const option = document.createElement('option');
+                option.value = role;
+                option.textContent = role;
+                roleFilter.appendChild(option);
+            });
+        }
+
+        if (departmentFilter) {
+            const departments = [...new Set(users.map(user => user.department).filter(Boolean))].sort();
+            departments.forEach(department => {
+                const option = document.createElement('option');
+                option.value = department;
+                option.textContent = department;
+                departmentFilter.appendChild(option);
+            });
+        }
+    }
+
+    function setupEventListeners() {
+        if (searchInput) searchInput.addEventListener('input', filterAndRender);
+        if (roleFilter) roleFilter.addEventListener('change', filterAndRender);
+        if (departmentFilter) departmentFilter.addEventListener('change', filterAndRender);
+    }
+
+    function generateTableHeaders() {
+        if (!tableHeader) return;
+        let headersHtml = '<tr>';
+        userFormConfig.forEach(field => {
+            if (field.type !== 'textarea' && !field.tableHidden) {
+                headersHtml += `<th>${field.name}</th>`;
+            }
+        });
+        headersHtml += '<th>Created At</th><th>Actions</th></tr>';
+        tableHeader.innerHTML = headersHtml;
+    }
+
+    function updateStats() {
+        if (!totalUsersEl || !activeUsersEl || !newThisMonthEl) return;
+
+        const total = users.length;
+        const active = users.filter(user => user.status === 'Active' || (user.role && user.role !== 'Inactive')).length;
+        
+        const thisMonth = new Date();
+        const firstDayOfMonth = new Date(thisMonth.getFullYear(), thisMonth.getMonth(), 1);
+        const newThisMonthCount = users.filter(user => {
+            return user.createdAt && new Date(user.createdAt) >= firstDayOfMonth;
+        }).length;
+
+        totalUsersEl.textContent = total;
+        activeUsersEl.textContent = active;
+        newThisMonthEl.textContent = newThisMonthCount;
+    }
+
+    function filterAndRender() {
+        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+        const role = roleFilter ? roleFilter.value : '';
+        const department = departmentFilter ? departmentFilter.value : '';
+
+        filteredUsers = users.filter(user => {
+            const searchMatch = !searchTerm || 
+                userFormConfig.some(field => {
+                    const value = user[field.id];
+                    return value && String(value).toLowerCase().includes(searchTerm);
+                });
+            const roleMatch = !role || user.role === role;
+            const departmentMatch = !department || user.department === department;
+            return searchMatch && roleMatch && departmentMatch;
+        });
+
+        currentPage = 1;
+        renderTable();
+    }
+
+    function renderTable() {
+        if (!tableBody || !emptyState || !paginationContainer) return;
+
+        if (filteredUsers.length === 0) {
+            tableBody.innerHTML = '';
+            emptyState.classList.remove('hidden');
+            paginationContainer.style.display = 'none';
+            return;
+        }
+
+        emptyState.classList.add('hidden');
+        paginationContainer.style.display = 'flex';
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const pageUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+
+        let tableHtml = '';
+        pageUsers.forEach(user => {
+            tableHtml += '<tr>';
+            userFormConfig.forEach(field => {
+                if (field.type !== 'textarea' && !field.tableHidden) {
+                    let cellValue = user[field.id] || '-';
+                    if (field.type === 'date' && cellValue !== '-' && cellValue) {
+                        try {
+                           cellValue = new Date(cellValue + 'T00:00:00').toLocaleDateString(); // Ensure date is parsed as local
+                        } catch (e) { console.error('Error parsing date:', cellValue, e); cellValue = user[field.id];}
+                    }
+                    if (field.id === 'role' && cellValue !== '-') {
+                        cellValue = `<span class="badge ${getBadgeClass(cellValue)}">${cellValue}</span>`;
+                    }
+                    tableHtml += `<td>${cellValue}</td>`;
+                }
+            });
+            const createdDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-';
+            tableHtml += `<td>${createdDate}</td>`;
+            tableHtml += `
+                <td>
+                    <div class="actions">
+                        <button class="btn btn-sm btn-primary" onclick="window.appNamespace.editUser('${user.id}')">✏️ Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="window.appNamespace.deleteUser('${user.id}')">🗑️ Delete</button>
+                    </div>
+                </td>`;
+            tableHtml += '</tr>';
+        });
+        tableBody.innerHTML = tableHtml;
+        renderPagination();
+    }
+    
+    function getBadgeClass(role) {
+        const roleLower = String(role || '').toLowerCase();
+        if (roleLower.includes('admin')) return 'badge-primary';
+        if (roleLower.includes('supervisor')) return 'badge-success';
+        if (roleLower.includes('counselor')) return 'badge-warning';
+        return 'badge-secondary';
+    }
+
+    function renderPagination() {
+        if (!paginationContainer) return;
+        const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+        if (totalPages <= 1) {
+            paginationContainer.innerHTML = '';
+            return;
+        }
+        let paginationHtml = `<button class="page-btn" onclick="window.appNamespace.changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>← Previous</button>`;
+        for (let i = 1; i <= totalPages; i++) {
+            paginationHtml += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="window.appNamespace.changePage(${i})">${i}</button>`;
+        }
+        paginationHtml += `<button class="page-btn" onclick="window.appNamespace.changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next →</button>`;
+        paginationContainer.innerHTML = paginationHtml;
+    }
+
+    window.appNamespace = {
+        changePage: function(newPage) {
+            if (newPage < 1 || newPage > Math.ceil(filteredUsers.length / itemsPerPage)) return;
+            currentPage = newPage;
+            renderTable();
+        },
+        editUser: function(userId) {
+            console.log('Attempting to edit user:', userId);
+            // This should redirect to the form page with the user's ID
+            window.location.href = `{{ url_for('users_form') }}?edit_id=${userId}`;
+        },
+        deleteUser: function(userId) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                users = users.filter(user => String(user.id) !== String(userId));
+                localStorage.setItem('users', JSON.stringify(users));
+                loadUsers(); 
+                filterAndRender();
+                updateStats(); 
+            }
+        }
+    };
+
+})();
+</script>
+{% endblock page_content %}

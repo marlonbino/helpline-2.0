@@ -1,0 +1,324 @@
+{% extends "dashboard.html" %}
+
+{% block page_content %}
+<style>
+    /* Styles adapted from table_users.html, prefixed with .case-table- */
+    .case-table-container-wrapper { padding: 10px; }
+    .case-table-controls {
+        display: flex; flex-wrap: wrap; justify-content: space-between;
+        align-items: center; margin-bottom: 25px; gap: 15px;
+    }
+    .case-table-search-box {
+        display: flex; align-items: center; background: white;
+        border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px;
+        flex: 1 1 300px; min-width: 250px;
+    }
+    .case-table-search-input {
+        border: none; outline: none; flex: 1; font-size: 14px;
+        background-color: #fff; color: #334155;
+    }
+    .case-table-search-box span { margin-right: 8px; color: #64748b; }
+    .case-table-filter-select {
+        padding: 9px 15px; border: 1px solid #e2e8f0; border-radius: 8px;
+        background: white; font-size: 14px; flex: 1 1 180px; min-width: 150px;
+    }
+    .case-table-stats {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 20px; margin-bottom: 30px;
+    }
+    .case-table-stat-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; text-align: center; }
+    .case-table-stat-number { font-size: 28px; font-weight: 700; color: #3b82f6; margin-bottom: 5px; }
+    .case-table-stat-label { font-size: 13px; color: #64748b; font-weight: 500; }
+    .case-table-section { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
+    .case-table-header-bar {
+        padding: 15px 20px; border-bottom: 1px solid #e2e8f0; display: flex;
+        justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    }
+    .case-table-title { font-size: 18px; font-weight: 600; color: #0f172a; }
+    .case-table-add-button {
+        padding: 8px 16px; background: #059669; color: white; text-decoration: none;
+        border-radius: 8px; font-weight: 500; font-size: 14px; transition: background 0.2s;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
+    .case-table-add-button:hover { background: #047857; }
+    .case-table-container-actual { overflow-x: auto; }
+    .case-table-actual { width: 100%; border-collapse: collapse; min-width: 700px; }
+    .case-table-actual th, .case-table-actual td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+    .case-table-actual th { background: #f8fafc; font-weight: 600; color: #374151; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .case-table-actual tr:hover { background: #f1f5f9; }
+    .case-table-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; text-transform: uppercase; white-space: nowrap; }
+    .case-table-badge-new { background-color: #ccfbf1; color: #0f766e; } /* Teal */
+    .case-table-badge-open { background-color: #dbeafe; color: #1d4ed8; } /* Blue */
+    .case-table-badge-progress { background-color: #fef9c3; color: #854d0e; } /* Yellow */
+    .case-table-badge-resolved { background-color: #dcfce7; color: #166534; } /* Green */
+    .case-table-badge-closed { background-color: #f3f4f6; color: #4b5563; } /* Gray */
+    .case-table-badge-high { background-color: #fee2e2; color: #b91c1c; } /* Red for High Prio */
+    .case-table-badge-medium { background-color: #ffedd5; color: #c2410c; } /* Orange for Medium Prio */
+    .case-table-badge-low { background-color: #ecfccb; color: #4d7c0f; } /* Lime for Low Prio */
+    .case-table-actions { display: flex; gap: 8px; align-items: center; }
+    .case-table-btn { padding: 6px 10px; border: none; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+    .case-table-btn-primary { background: #3b82f6; color: white; }
+    .case-table-btn-primary:hover { background: #2563eb; }
+    .case-table-btn-danger { background: #ef4444; color: white; }
+    .case-table-btn-danger:hover { background: #dc2626; }
+    .case-table-empty-state { text-align: center; padding: 40px 20px; color: #64748b; }
+    .case-table-empty-icon { font-size: 40px; margin-bottom: 12px; }
+    .case-table-pagination { display: flex; justify-content: center; align-items: center; gap: 8px; padding: 15px 20px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; }
+    .case-table-page-btn { padding: 8px 12px; border: 1px solid #e2e8f0; background: white; color: #374151; cursor: pointer; border-radius: 6px; transition: all 0.2s; font-size: 13px; }
+    .case-table-page-btn:hover { background: #f8fafc; }
+    .case-table-page-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+    .case-table-page-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .case-table-hidden { display: none !important; }
+</style>
+
+<div class="case-table-container-wrapper">
+    <div class="case-table-stats">
+        <div class="case-table-stat-card">
+            <div class="case-table-stat-number" id="totalCases">0</div>
+            <div class="case-table-stat-label">Total Cases</div>
+        </div>
+        <div class="case-table-stat-card">
+            <div class="case-table-stat-number" id="openCases">0</div>
+            <div class="case-table-stat-label">Open Cases</div>
+        </div>
+        <div class="case-table-stat-card">
+            <div class="case-table-stat-number" id="resolvedThisMonth">0</div>
+            <div class="case-table-stat-label">Resolved This Month</div>
+        </div>
+    </div>
+
+    <div class="case-table-controls">
+        <div class="case-table-search-box">
+            <span>🔍</span>
+            <input type="text" class="case-table-search-input" placeholder="Search cases..." id="caseSearchInput">
+        </div>
+        <select class="case-table-filter-select" id="caseStatusFilter">
+            <option value="">All Statuses</option>
+        </select>
+        <select class="case-table-filter-select" id="casePriorityFilter">
+            <option value="">All Priorities</option>
+        </select>
+    </div>
+
+    <div class="case-table-section">
+        <div class="case-table-header-bar">
+            <div class="case-table-title">Case Management</div>
+            <a href="{{ url_for('cases_form') }}" class="case-table-add-button">➕ Add New Case</a>
+        </div>
+        
+        <div class="case-table-container-actual">
+            <table class="case-table-actual" id="casesTable">
+                <thead id="caseTableHeader">
+                    <!-- Dynamic headers will be generated here -->
+                </thead>
+                <tbody id="caseTableBody">
+                    <!-- Dynamic rows will be generated here -->
+                </tbody>
+            </table>
+            
+            <div class="case-table-empty-state case-table-hidden" id="caseEmptyState">
+                <div class="case-table-empty-icon">📁</div>
+                <h3>No cases found</h3>
+                <p>Start by adding your first case to the system.</p>
+                <a href="{{ url_for('cases_form') }}" class="case-table-btn case-table-btn-primary" style="margin-top: 15px;">➕ Add First Case</a>
+            </div>
+        </div>
+        
+        <div class="case-table-pagination" id="casePagination">
+            <!-- Pagination will be generated here -->
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    const caseFormConfig = [
+        { name: 'Case Title', id: 'caseTitle', tableVisible: true },
+        { name: 'Client Name', id: 'clientName', tableVisible: true },
+        { name: 'Case Type', id: 'caseType', tableVisible: true },
+        { name: 'Status', id: 'status', tableVisible: true },
+        { name: 'Priority', id: 'priority', tableVisible: true },
+        { name: 'Assigned To', id: 'assignedTo', tableVisible: true },
+        { name: 'Date Opened', id: 'dateOpened', type: 'date', tableVisible: true },
+        { name: 'Description', id: 'description', tableVisible: false }, // Not shown in table by default
+        { name: 'Resolution Details', id: 'resolutionDetails', tableVisible: false },
+        { name: 'Date Closed', id: 'dateClosed', type: 'date', tableVisible: false }
+    ];
+
+    let allCases = [];
+    let filteredCases = [];
+    let currentCasePage = 1;
+    const casesPerPage = 10;
+
+    let searchInput, statusFilter, priorityFilter, tableHeader, tableBody, emptyState, paginationContainer;
+    let totalCasesEl, openCasesEl, resolvedThisMonthEl;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        searchInput = document.getElementById('caseSearchInput');
+        statusFilter = document.getElementById('caseStatusFilter');
+        priorityFilter = document.getElementById('casePriorityFilter');
+        tableHeader = document.getElementById('caseTableHeader');
+        tableBody = document.getElementById('caseTableBody');
+        emptyState = document.getElementById('caseEmptyState');
+        paginationContainer = document.getElementById('casePagination');
+        totalCasesEl = document.getElementById('totalCases');
+        openCasesEl = document.getElementById('openCases');
+        resolvedThisMonthEl = document.getElementById('resolvedThisMonth');
+
+        if (!tableBody) { console.error("Case table body not found."); return; }
+        
+        loadCasesData();
+        populateCaseFilterDropdowns();
+        generateCaseTableHeaders();
+        updateCaseStats();
+        filterAndRenderCases();
+        setupCaseEventListeners();
+    });
+
+    function loadCasesData() {
+        const storedCases = localStorage.getItem('cases');
+        allCases = storedCases ? JSON.parse(storedCases) : [];
+        filteredCases = [...allCases];
+    }
+
+    function populateCaseFilterDropdowns() {
+        const statuses = [...new Set(allCases.map(c => c.status).filter(Boolean))].sort();
+        statuses.forEach(s => statusFilter.add(new Option(s, s)));
+
+        const priorities = [...new Set(allCases.map(c => c.priority).filter(Boolean))].sort();
+        priorities.forEach(p => priorityFilter.add(new Option(p, p)));
+    }
+
+    function setupCaseEventListeners() {
+        if (searchInput) searchInput.addEventListener('input', filterAndRenderCases);
+        if (statusFilter) statusFilter.addEventListener('change', filterAndRenderCases);
+        if (priorityFilter) priorityFilter.addEventListener('change', filterAndRenderCases);
+    }
+
+    function generateCaseTableHeaders() {
+        let headersHtml = '<tr>';
+        caseFormConfig.forEach(field => {
+            if (field.tableVisible) headersHtml += `<th>${field.name}</th>`;
+        });
+        headersHtml += '<th>Created At</th><th>Actions</th></tr>';
+        tableHeader.innerHTML = headersHtml;
+    }
+
+    function updateCaseStats() {
+        totalCasesEl.textContent = allCases.length;
+        const openStatuses = ['New', 'Open', 'In Progress', 'Pending Client Input'];
+        openCasesEl.textContent = allCases.filter(c => openStatuses.includes(c.status)).length;
+        
+        const thisMonth = new Date();
+        const firstDay = new Date(thisMonth.getFullYear(), thisMonth.getMonth(), 1);
+        resolvedThisMonthEl.textContent = allCases.filter(c => 
+            c.status === 'Resolved' && c.dateClosed && new Date(c.dateClosed) >= firstDay
+        ).length;
+    }
+
+    function filterAndRenderCases() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const statusVal = statusFilter.value;
+        const priorityVal = priorityFilter.value;
+
+        filteredCases = allCases.filter(c => {
+            const searchMatch = !searchTerm || 
+                Object.values(c).some(val => String(val).toLowerCase().includes(searchTerm));
+            const statusMatch = !statusVal || c.status === statusVal;
+            const priorityMatch = !priorityVal || c.priority === priorityVal;
+            return searchMatch && statusMatch && priorityMatch;
+        });
+        currentCasePage = 1;
+        renderCaseTable();
+    }
+
+    function getCaseBadgeClass(fieldId, value) {
+        if (!value) return 'case-table-badge-closed'; // Default or for empty values
+        const valLower = value.toLowerCase();
+        if (fieldId === 'status') {
+            if (valLower.includes('new')) return 'case-table-badge-new';
+            if (valLower.includes('open')) return 'case-table-badge-open';
+            if (valLower.includes('progress')) return 'case-table-badge-progress';
+            if (valLower.includes('resolved')) return 'case-table-badge-resolved';
+            if (valLower.includes('closed') || valLower.includes('cancel')) return 'case-table-badge-closed';
+        } else if (fieldId === 'priority') {
+            if (valLower.includes('urgent') || valLower.includes('high')) return 'case-table-badge-high';
+            if (valLower.includes('medium')) return 'case-table-badge-medium';
+            if (valLower.includes('low')) return 'case-table-badge-low';
+        }
+        return 'case-table-badge-closed'; // Default
+    }
+
+    function renderCaseTable() {
+        if (filteredCases.length === 0) {
+            tableBody.innerHTML = '';
+            emptyState.classList.remove('case-table-hidden');
+            paginationContainer.style.display = 'none';
+            return;
+        }
+        emptyState.classList.add('case-table-hidden');
+        paginationContainer.style.display = 'flex';
+
+        const startIndex = (currentCasePage - 1) * casesPerPage;
+        const pageCases = filteredCases.slice(startIndex, startIndex + casesPerPage);
+        let tableHtml = '';
+        pageCases.forEach(c => {
+            tableHtml += '<tr>';
+            caseFormConfig.forEach(field => {
+                if (field.tableVisible) {
+                    let cellValue = c[field.id] || '-';
+                    if (field.type === 'date' && cellValue !== '-' && cellValue) {
+                        try { cellValue = new Date(cellValue + 'T00:00:00').toLocaleDateString(); } 
+                        catch (e) { console.error('Date parse error:', e); cellValue = c[field.id]; }
+                    }
+                    if (field.id === 'status' || field.id === 'priority') {
+                        cellValue = `<span class="case-table-badge ${getCaseBadgeClass(field.id, cellValue)}">${cellValue}</span>`;
+                    }
+                    tableHtml += `<td>${cellValue}</td>`;
+                }
+            });
+            const createdDate = c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '-';
+            tableHtml += `<td>${createdDate}</td>`;
+            tableHtml += `<td><div class="case-table-actions">
+                <button class="case-table-btn case-table-btn-primary" onclick="window.caseTableNamespace.editCase('${c.id}')">✏️ Edit</button>
+                <button class="case-table-btn case-table-btn-danger" onclick="window.caseTableNamespace.deleteCase('${c.id}')">🗑️ Delete</button>
+            </div></td>`;
+            tableHtml += '</tr>';
+        });
+        tableBody.innerHTML = tableHtml;
+        renderCasePagination();
+    }
+
+    function renderCasePagination() {
+        const totalPages = Math.ceil(filteredCases.length / casesPerPage);
+        if (totalPages <= 1) { paginationContainer.innerHTML = ''; return; }
+        let paginationHtml = `<button class="case-table-page-btn" onclick="window.caseTableNamespace.changeCasePage(${currentCasePage - 1})" ${currentCasePage === 1 ? 'disabled' : ''}>← Prev</button>`;
+        for (let i = 1; i <= totalPages; i++) {
+            paginationHtml += `<button class="case-table-page-btn ${i === currentCasePage ? 'active' : ''}" onclick="window.caseTableNamespace.changeCasePage(${i})">${i}</button>`;
+        }
+        paginationHtml += `<button class="case-table-page-btn" onclick="window.caseTableNamespace.changeCasePage(${currentCasePage + 1})" ${currentCasePage === totalPages ? 'disabled' : ''}>Next →</button>`;
+        paginationContainer.innerHTML = paginationHtml;
+    }
+
+    window.caseTableNamespace = {
+        changeCasePage: function(newPage) {
+            if (newPage < 1 || newPage > Math.ceil(filteredCases.length / casesPerPage)) return;
+            currentCasePage = newPage;
+            renderCaseTable();
+        },
+        editCase: function(caseId) {
+            window.location.href = `{{ url_for('cases_form') }}?edit_id=${caseId}`;
+        },
+        deleteCase: function(caseId) {
+            if (confirm('Are you sure you want to delete this case?')) {
+                allCases = allCases.filter(c => String(c.id) !== String(caseId));
+                localStorage.setItem('cases', JSON.stringify(allCases));
+                loadCasesData(); filterAndRenderCases(); updateCaseStats();
+            }
+        }
+    };
+})();
+</script>
+{% endblock page_content %}
