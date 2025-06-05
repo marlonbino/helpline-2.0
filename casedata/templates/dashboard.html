@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Management Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+        }
+        
+        .header {
+            grid-column: 1 / -1;
+            margin-bottom: 10px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card {
+            text-align: center;
+            grid-column: span 3;
+        }
+        
+        .stat-card h2 {
+            font-size: 16px;
+            margin-top: 0;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+        
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 10px 0;
+            color: #2c3e50;
+        }
+        
+        .stat-card .change {
+            color: #27ae60;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .negative-change {
+            color: #e74c3c !important;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-weight: 600;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 200px;
+            width: 100%;
+            margin-top: 15px;
+        }
+        
+        .view-all {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 14px;
+            display: block;
+            text-align: right;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+        
+        .recent-cases {
+            grid-column: span 4;
+        }
+        
+        .case-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .case-item:last-child {
+            border-bottom: none;
+        }
+        
+        .case-time {
+            color: #7f8c8d;
+            font-size: 13px;
+            width: 60px;
+        }
+        
+        .case-details {
+            flex-grow: 1;
+            margin-left: 15px;
+        }
+        
+        .case-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .case-type {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        
+        .priority {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .priority.high {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .priority.medium {
+            background-color: #f39c12;
+            color: white;
+        }
+        
+        .priority.low {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .case-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-right: 5px;
+            color: white;
+        }
+        
+        .tag-abuse { background-color: #e74c3c; }
+        .tag-counseling { background-color: #3498db; }
+        .tag-distress { background-color: #9b59b6; }
+        .tag-fraud { background-color: #f39c12; }
+        .tag-health { background-color: #2ecc71; }
+        .tag-inquiry { background-color: #1abc9c; }
+        .tag-new { background-color: #34495e; }
+
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            .stat-card {
+                grid-column: span 3;
+            }
+            .recent-cases {
+                grid-column: span 6;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .stat-card {
+                grid-column: span 2;
+            }
+            .recent-cases {
+                grid-column: span 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header card">
+            <h1>Case Management Dashboard</h1>
+        </div>
+        
+        <!-- Stats Row -->
+        <div class="card stat-card">
+            <h2>Total Cases</h2>
+            <div class="value">847</div>
+            <div class="change">+12.5% from last month</div>
+        </div>
+        
+        <div class="card stat-card">
+            <h2>Active Cases</h2>
+            <div class="value">124</div>
+            <div class="change">+8.7% from last month</div>
+        </div>
+        
+        <div class="card stat-card">
+            <h2>Escalated Cases</h2>
+            <div class="value">47</div>
+            <div class="change negative">+15.3% from last month</div>
+        </div>
+        
+        <div class="card stat-card">
+            <h2>New Cases</h2>
+            <div class="value">112</div>
+            <div class="change">+22.1% from last month</div>
+        </div>
+        
+        <!-- Case Category Distribution -->
+        <div class="card" style="grid-column: span 6;">
+            <h3 class="section-title">Case Category Distribution</h3>
+            <div class="chart-container">
+                <canvas id="caseCategoryChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Case Status Flow -->
+        <div class="card" style="grid-column: span 6;">
+            <h3 class="section-title">Case Status Flow</h3>
+            <div class="chart-container">
+                <canvas id="caseFlowChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Cases by Category Trend -->
+        <div class="card" style="grid-column: span 8;">
+            <h3 class="section-title">Cases by Category (6 Months)</h3>
+            <div class="chart-container" style="height: 250px;">
+                <canvas id="categoryTrendChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Case Priority Breakdown -->
+        <div class="card" style="grid-column: span 4;">
+            <h3 class="section-title">Case Priority</h3>
+            <div class="chart-container">
+                <canvas id="priorityChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Recent Cases -->
+        <div class="card recent-cases">
+            <h3 class="section-title">Recent Case Activity</h3>
+            <div class="case-item">
+                <div class="case-time">10:30 AM</div>
+                <div class="case-details">
+                    <div class="case-name">Case #1245 <span class="case-tag tag-abuse">Abuse</span></div>
+                    <div class="case-type">Anonymous</div>
+                </div>
+                <div class="priority high">High</div>
+            </div>
+            <div class="case-item">
+                <div class="case-time">10:20 AM</div>
+                <div class="case-details">
+                    <div class="case-name">Case #982 <span class="case-tag tag-counseling">Counseling</span></div>
+                    <div class="case-type">Sarah M.</div>
+                </div>
+                <div class="priority medium">Medium</div>
+            </div>
+            <div class="case-item">
+                <div class="case-time">9:05 AM</div>
+                <div class="case-details">
+                    <div class="case-name">Case #1244 <span class="case-tag tag-distress">Distress</span></div>
+                    <div class="case-type">Anonymous</div>
+                </div>
+                <div class="priority low">Low</div>
+            </div>
+            <div class="case-item">
+                <div class="case-time">7:05 AM</div>
+                <div class="case-details">
+                    <div class="case-name">Case #981 <span class="case-tag tag-fraud">Fraud/Theft</span></div>
+                    <div class="case-type">John D.</div>
+                </div>
+                <div class="priority high">High</div>
+            </div>
+            <div class="case-item">
+                <div class="case-time">6:30 AM</div>
+                <div class="case-details">
+                    <div class="case-name">Case #980 <span class="case-tag tag-health">Health</span></div>
+                    <div class="case-type">Mary K.</div>
+                </div>
+                <div class="priority medium">Medium</div>
+            </div>
+            <a href="#" class="view-all">View All Cases</a>
+        </div>
+        
+        <!-- Case Resolution by Category -->
+        <div class="card" style="grid-column: span 8;">
+            <h3 class="section-title">Resolution Time by Category</h3>
+            <div class="chart-container" style="height: 250px;">
+                <canvas id="resolutionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Case Category Distribution Chart (Doughnut)
+        const caseCategoryCtx = document.getElementById('caseCategoryChart').getContext('2d');
+        const caseCategoryChart = new Chart(caseCategoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Abuse', 'Counseling', 'Distress', 'Fraud/Theft', 'Health', 'Information Inquiry', 'New'],
+                datasets: [{
+                    data: [25, 18, 15, 12, 10, 15, 5],
+                    backgroundColor: [
+                        '#e74c3c',
+                        '#3498db',
+                        '#9b59b6',
+                        '#f39c12',
+                        '#2ecc71',
+                        '#1abc9c',
+                        '#34495e'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
+                },
+                cutout: '65%'
+            }
+        });
+
+        // Case Status Flow Chart (Line)
+        const caseFlowCtx = document.getElementById('caseFlowChart').getContext('2d');
+        const caseFlowChart = new Chart(caseFlowCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    {
+                        label: 'New Cases',
+                        data: [120, 140, 160, 150, 180, 200],
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Resolved Cases',
+                        data: [80, 100, 120, 130, 150, 170],
+                        borderColor: '#2ecc71',
+                        backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Category Trend Chart (Bar)
+        const categoryTrendCtx = document.getElementById('categoryTrendChart').getContext('2d');
+        const categoryTrendChart = new Chart(categoryTrendCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    {
+                        label: 'Abuse',
+                        data: [20, 22, 25, 23, 26, 25],
+                        backgroundColor: '#e74c3c'
+                    },
+                    {
+                        label: 'Counseling',
+                        data: [15, 16, 18, 17, 19, 18],
+                        backgroundColor: '#3498db'
+                    },
+                    {
+                        label: 'Distress',
+                        data: [12, 14, 15, 13, 16, 15],
+                        backgroundColor: '#9b59b6'
+                    },
+                    {
+                        label: 'Fraud/Theft',
+                        data: [10, 11, 12, 10, 13, 12],
+                        backgroundColor: '#f39c12'
+                    },
+                    {
+                        label: 'Health',
+                        data: [8, 9, 10, 9, 11, 10],
+                        backgroundColor: '#2ecc71'
+                    },
+                    {
+                        label: 'Information Inquiry',
+                        data: [12, 14, 15, 14, 16, 15],
+                        backgroundColor: '#1abc9c'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        stacked: false,
+                        grid: {
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        stacked: false,
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Priority Chart (Pie)
+        const priorityCtx = document.getElementById('priorityChart').getContext('2d');
+        const priorityChart = new Chart(priorityCtx, {
+            type: 'pie',
+            data: {
+                labels: ['High Priority', 'Medium Priority', 'Low Priority'],
+                datasets: [{
+                    data: [25, 45, 30],
+                    backgroundColor: [
+                        '#e74c3c',
+                        '#f39c12',
+                        '#2ecc71'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
+                }
+            }
+        });
+
+        // Resolution Time Chart (Bar)
+        const resolutionCtx = document.getElementById('resolutionChart').getContext('2d');
+        const resolutionChart = new Chart(resolutionCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Abuse', 'Counseling', 'Distress', 'Fraud/Theft', 'Health', 'Information Inquiry'],
+                datasets: [{
+                    label: 'Average Days to Resolve',
+                    data: [7.2, 5.5, 4.8, 3.2, 6.7, 2.5],
+                    backgroundColor: [
+                        '#e74c3c',
+                        '#3498db',
+                        '#9b59b6',
+                        '#f39c12',
+                        '#2ecc71',
+                        '#1abc9c'
+                    ],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Days'
+                        },
+                        grid: {
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

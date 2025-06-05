@@ -1,0 +1,404 @@
+{% extends "homebase.html" %}
+
+{% block csscripts %}
+<style>
+    .table-container {
+        margin-bottom: 3rem;
+    }
+    .table-description {
+        margin-bottom: 1rem;
+    }
+    .theme-table-dark {
+        background-color: #343a40;
+        color: white;
+    }
+    .theme-table-primary {
+        background-color: #e0f2fe;
+    }
+    .theme-table-success {
+        background-color: #d1fae5;
+    }
+    .theme-table-warning {
+        background-color: #fef3c7;
+    }
+</style>
+{% endblock %}
+
+{% block hero %}
+<div class="container-fluid py-5 bg-primary hero-header mb-5">
+    <div class="container my-5 py-5 px-lg-5">
+        <div class="row g-5 py-5">
+            <div class="col-12 text-center">
+                <h1 class="text-white animated zoomIn">Tables Demo</h1>
+                <hr class="bg-white mx-auto mt-0" style="width: 90px;">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb justify-content-center">
+                        <li class="breadcrumb-item"><a class="text-white" href="{{ url_for('index') }}">Home</a></li>
+                        <li class="breadcrumb-item text-white active" aria-current="page">Demo</li>
+                        <li class="breadcrumb-item text-white active" aria-current="page">Tables</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-xxl py-5">
+    <div class="container px-lg-5">
+        <div class="section-title position-relative text-center mb-5 pb-2 wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="position-relative d-inline text-primary ps-4">Demo</h6>
+            <h2 class="mt-2">Table Display with Jinja Templating</h2>
+        </div>
+
+        <!-- Basic Table with Loop -->
+        <div class="row g-4 table-container">
+            <div class="col-lg-12 col-md-12 wow fadeInUp" data-wow-delay="0.1s">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Basic Table with Jinja Loop</h5>
+                        <div class="table-description">
+                            <p>This table demonstrates basic Jinja looping through a list of dictionaries.</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Project</th>
+                                        <th>Client</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% set projects = [
+                                        {'id': 1, 'name': 'Helpline Migration', 'client': 'Internal', 'status': 'Active'},
+                                        {'id': 2, 'name': 'CRM Integration', 'client': 'Acme Corp', 'status': 'Pending'},
+                                        {'id': 3, 'name': 'Mobile App', 'client': 'TechStart', 'status': 'Completed'},
+                                        {'id': 4, 'name': 'Data Migration', 'client': 'GlobalSys', 'status': 'On Hold'},
+                                        {'id': 5, 'name': 'API Development', 'client': 'DevGroup', 'status': 'Active'}
+                                    ] %}
+                                    
+                                    {% for project in projects %}
+                                    <tr>
+                                        <td>{{ project.id }}</td>
+                                        <td>{{ project.name }}</td>
+                                        <td>{{ project.client }}</td>
+                                        <td>
+                                            {% if project.status == 'Active' %}
+                                                <span class="badge bg-success">{{ project.status }}</span>
+                                            {% elif project.status == 'Pending' %}
+                                                <span class="badge bg-warning">{{ project.status }}</span>
+                                            {% elif project.status == 'Completed' %}
+                                                <span class="badge bg-info">{{ project.status }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ project.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary">View</button>
+                                            <button class="btn btn-sm btn-warning">Edit</button>
+                                            <button class="btn btn-sm btn-danger">Delete</button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conditional Table with Different Styles -->
+        <div class="row g-4 table-container">
+            <div class="col-lg-12 col-md-12 wow fadeInUp" data-wow-delay="0.3s">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Conditional Table Styling</h5>
+                        <div class="table-description">
+                            <p>This table demonstrates conditional styling based on data attributes.</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>User ID</th>
+                                        <th>Name</th>
+                                        <th>Role</th>
+                                        <th>Department</th>
+                                        <th>Access Level</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% set users = [
+                                        {'id': 101, 'name': 'John Doe', 'role': 'Administrator', 'department': 'IT', 'access': 'Full'},
+                                        {'id': 102, 'name': 'Jane Smith', 'role': 'Manager', 'department': 'Support', 'access': 'High'},
+                                        {'id': 103, 'name': 'Mike Johnson', 'role': 'Agent', 'department': 'Sales', 'access': 'Medium'},
+                                        {'id': 104, 'name': 'Sarah Williams', 'role': 'Agent', 'department': 'Support', 'access': 'Medium'},
+                                        {'id': 105, 'name': 'David Brown', 'role': 'Visitor', 'department': 'External', 'access': 'Low'}
+                                    ] %}
+                                    
+                                    {% for user in users %}
+                                    <tr class="{% if user.access == 'Full' %}table-danger{% elif user.access == 'High' %}table-warning{% elif user.access == 'Medium' %}table-info{% else %}table-light{% endif %}">
+                                        <td>{{ user.id }}</td>
+                                        <td>{{ user.name }}</td>
+                                        <td>{{ user.role }}</td>
+                                        <td>{{ user.department }}</td>
+                                        <td>{{ user.access }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table with Pagination Simulation -->
+        <div class="row g-4 table-container">
+            <div class="col-lg-12 col-md-12 wow fadeInUp" data-wow-delay="0.5s">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Table with Pagination</h5>
+                        <div class="table-description">
+                            <p>This table demonstrates pagination functionality with Jinja.</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% set current_page = 1 %}
+                        {% set items_per_page = 3 %}
+                        {% set total_pages = 3 %}
+
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Case ID</th>
+                                        <th>Subject</th>
+                                        <th>Priority</th>
+                                        <th>Assigned To</th>
+                                        <th>Created Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% set cases = [
+                                        {'id': 'CS-001', 'subject': 'Network Issue', 'priority': 'High', 'assigned': 'John Doe', 'date': '2025-06-01'},
+                                        {'id': 'CS-002', 'subject': 'Account Access', 'priority': 'Medium', 'assigned': 'Jane Smith', 'date': '2025-06-02'},
+                                        {'id': 'CS-003', 'subject': 'Billing Question', 'priority': 'Low', 'assigned': 'Mike Johnson', 'date': '2025-06-02'}
+                                    ] %}
+                                    
+                                    {% for case in cases %}
+                                    <tr>
+                                        <td>{{ case.id }}</td>
+                                        <td>{{ case.subject }}</td>
+                                        <td>
+                                            {% if case.priority == 'High' %}
+                                                <span class="badge bg-danger">{{ case.priority }}</span>
+                                            {% elif case.priority == 'Medium' %}
+                                                <span class="badge bg-warning">{{ case.priority }}</span>
+                                            {% else %}
+                                                <span class="badge bg-success">{{ case.priority }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ case.assigned }}</td>
+                                        <td>{{ case.date }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            
+                            <!-- Pagination controls -->
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+                                        <a class="page-link" href="#" tabindex="-1">Previous</a>
+                                    </li>
+                                    {% for page in range(1, total_pages + 1) %}
+                                    <li class="page-item {% if page == current_page %}active{% endif %}">
+                                        <a class="page-link" href="#">{{ page }}</a>
+                                    </li>
+                                    {% endfor %}
+                                    <li class="page-item {% if current_page == total_pages %}disabled{% endif %}">
+                                        <a class="page-link" href="#">Next</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme-specific Tables -->
+        <div class="row g-4 table-container">
+            <div class="col-lg-12 col-md-12 wow fadeInUp" data-wow-delay="0.7s">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Theme-specific Tables</h5>
+                        <div class="table-description">
+                            <p>These tables demonstrate different theme styles using Jinja includes and conditionals.</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% set theme = "theme3" %}  <!-- You can change this to theme1, theme2, theme3, or theme4 -->
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="themeSelector">Select Theme:</label>
+                                    <select class="form-control" id="themeSelector">
+                                        <option value="theme1" {% if theme == "theme1" %}selected{% endif %}>Theme 1</option>
+                                        <option value="theme2" {% if theme == "theme2" %}selected{% endif %}>Theme 2</option>
+                                        <option value="theme3" {% if theme == "theme3" %}selected{% endif %}>Theme 3</option>
+                                        <option value="theme4" {% if theme == "theme4" %}selected{% endif %}>Theme 4</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            {% if theme == "theme1" %}
+                                <table class="table">
+                                    <thead class="table-primary">
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Category</th>
+                                            <th>Price</th>
+                                            <th>Stock</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Theme 1 styled rows -->
+                                        <tr class="table-light">
+                                            <td>Smartphone</td>
+                                            <td>Electronics</td>
+                                            <td>$899</td>
+                                            <td>45</td>
+                                        </tr>
+                                        <tr class="table-light">
+                                            <td>Laptop</td>
+                                            <td>Electronics</td>
+                                            <td>$1299</td>
+                                            <td>23</td>
+                                        </tr>
+                                        <tr class="table-light">
+                                            <td>Headphones</td>
+                                            <td>Accessories</td>
+                                            <td>$199</td>
+                                            <td>78</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            {% elif theme == "theme2" %}
+                                <table class="table table-bordered">
+                                    <thead class="table-success">
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Category</th>
+                                            <th>Price</th>
+                                            <th>Stock</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Theme 2 styled rows -->
+                                        <tr>
+                                            <td>Smartphone</td>
+                                            <td>Electronics</td>
+                                            <td>$899</td>
+                                            <td>45</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Laptop</td>
+                                            <td>Electronics</td>
+                                            <td>$1299</td>
+                                            <td>23</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Headphones</td>
+                                            <td>Accessories</td>
+                                            <td>$199</td>
+                                            <td>78</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            {% elif theme == "theme3" %}
+                                <table class="table table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Category</th>
+                                            <th>Price</th>
+                                            <th>Stock</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Theme 3 styled rows -->
+                                        <tr>
+                                            <td>Smartphone</td>
+                                            <td>Electronics</td>
+                                            <td>$899</td>
+                                            <td>45</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Laptop</td>
+                                            <td>Electronics</td>
+                                            <td>$1299</td>
+                                            <td>23</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Headphones</td>
+                                            <td>Accessories</td>
+                                            <td>$199</td>
+                                            <td>78</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            {% else %}
+                                <table class="table table-hover">
+                                    <thead class="table-warning">
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Category</th>
+                                            <th>Price</th>
+                                            <th>Stock</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Theme 4 styled rows -->
+                                        <tr>
+                                            <td>Smartphone</td>
+                                            <td>Electronics</td>
+                                            <td>$899</td>
+                                            <td>45</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Laptop</td>
+                                            <td>Electronics</td>
+                                            <td>$1299</td>
+                                            <td>23</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Headphones</td>
+                                            <td>Accessories</td>
+                                            <td>$199</td>
+                                            <td>78</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
