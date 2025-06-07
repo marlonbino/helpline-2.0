@@ -1,0 +1,86 @@
+{% extends "dashboard.html" %}
+
+{% block page_content %}
+    <div class="header">
+        <h1>Chatbot</h1>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">🤖</div>
+            <div class="stat-label">Total Conversations</div>
+            <div class="stat-value">1,567</div>
+            <div class="stat-change stat-positive">↗ +12.5%</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">💬</div>
+            <div class="stat-label">Active Sessions</div>
+            <div class="stat-value">45</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-label">Response Time</div>
+            <div class="stat-value">1.2s</div>
+            <div class="stat-change stat-positive">↓ -20%</div>
+        </div>
+    </div>
+
+    <div class="chatbot-section">
+        <div class="chatbot-card">
+            <div class="chatbot-icon">🤖</div>
+            <div class="chatbot-title">Chatbot Performance</div>
+            <div class="chatbot-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Accuracy</div>
+                    <div class="stat-value">95.2%</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Success Rate</div>
+                    <div class="stat-value">92.5%</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Fallback Rate</div>
+                    <div class="stat-value">4.8%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chatbot-card">
+            <div class="chatbot-icon">📊</div>
+            <div class="chatbot-title">Intents Distribution</div>
+            <div class="chatbot-stats">
+                <div class="stat-item">
+                    <div class="stat-label">General Queries</div>
+                    <div class="stat-value">45%</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Emergency Cases</div>
+                    <div class="stat-value">25%</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Other</div>
+                    <div class="stat-value">30%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chatbot-card">
+            <div class="chatbot-icon">🎯</div>
+            <div class="chatbot-title">User Satisfaction</div>
+            <div class="chatbot-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Positive Feedback</div>
+                    <div class="stat-value">89%</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Negative Feedback</div>
+                    <div class="stat-value">11%</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Total Ratings</div>
+                    <div class="stat-value">1,234</div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

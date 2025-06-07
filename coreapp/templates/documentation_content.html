@@ -1,0 +1,147 @@
+{% extends "dashboard.html" %}
+
+{% block page_content %}
+    <div class="header">
+        <h1>Documentation</h1>
+        <div class="header-actions">
+            <button class="btn btn-primary btn-sm">
+                <i class="bi bi-search"></i> Search Docs
+            </button>
+            <button class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-bookmark-plus"></i> Add Bookmark
+            </button>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <div class="stat-label">Total Documents</div>
+            <div class="stat-value">125</div>
+            <div class="stat-change stat-positive">↗ +8.2%</div>
+            <div class="stat-footer">
+                <div class="stat-footer-item">
+                    <span class="stat-footer-label">Last Updated:</span>
+                    <span class="stat-footer-value">Today</span>
+                </div>
+                <div class="stat-footer-item">
+                    <span class="stat-footer-label">Contributors:</span>
+                    <span class="stat-footer-value">12</span>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📄</div>
+            <div class="stat-label">Updated This Month</div>
+            <div class="stat-value">15</div>
+            <div class="stat-footer">
+                <div class="stat-footer-item">
+                    <span class="stat-footer-label">Average:</span>
+                    <span class="stat-footer-value">5/day</span>
+                </div>
+                <div class="stat-footer-item">
+                    <span class="stat-footer-label">Trend:</span>
+                    <span class="stat-footer-value">↗ +12%</span>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🔍</div>
+            <div class="stat-label">Views Today</div>
+            <div class="stat-value">42</div>
+            <div class="stat-footer">
+                <div class="stat-footer-item">
+                    <span class="stat-footer-label">Unique:</span>
+                    <span class="stat-footer-value">35</span>
+                </div>
+                <div class="stat-footer-item">
+                    <span class="stat-footer-label">Average:</span>
+                    <span class="stat-footer-value">2.5/page</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="documentation-section">
+        <div class="doc-category">
+            <div class="doc-header">
+                <div class="doc-icon">⚙️</div>
+                <div class="doc-title">System Documentation</div>
+                <button class="btn btn-link btn-sm p-0">
+                    <i class="bi bi-three-dots-vertical"></i>
+                </button>
+            </div>
+            <div class="doc-stats">
+                <div class="stat-item">
+                    <div class="stat-label">API Guides</div>
+                    <div class="stat-value">12</div>
+                    <div class="stat-badge">New</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Setup Guides</div>
+                    <div class="stat-value">8</div>
+                    <div class="stat-badge">Updated</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Troubleshooting</div>
+                    <div class="stat-value">15</div>
+                    <div class="stat-badge">Popular</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-category">
+            <div class="doc-header">
+                <div class="doc-icon">👩‍💼</div>
+                <div class="doc-title">User Guides</div>
+                <button class="btn btn-link btn-sm p-0">
+                    <i class="bi bi-three-dots-vertical"></i>
+                </button>
+            </div>
+            <div class="doc-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Counselor Guide</div>
+                    <div class="stat-value">1</div>
+                    <div class="stat-badge">Updated</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Manager Guide</div>
+                    <div class="stat-value">1</div>
+                    <div class="stat-badge">Popular</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Admin Guide</div>
+                    <div class="stat-value">1</div>
+                    <div class="stat-badge">New</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-category">
+            <div class="doc-header">
+                <div class="doc-icon">📊</div>
+                <div class="doc-title">Reports & Analytics</div>
+                <button class="btn btn-link btn-sm p-0">
+                    <i class="bi bi-three-dots-vertical"></i>
+                </button>
+            </div>
+            <div class="doc-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Call Reports</div>
+                    <div class="stat-value">3</div>
+                    <div class="stat-badge">Updated</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Case Reports</div>
+                    <div class="stat-value">2</div>
+                    <div class="stat-badge">Popular</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">AI Reports</div>
+                    <div class="stat-value">4</div>
+                    <div class="stat-badge">New</div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

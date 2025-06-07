@@ -4,21 +4,20 @@
     <!-- Main Operations Section -->
     <div class="nav-section">
         <div class="nav-title">Operations</div>
-        <a href="#" class="nav-item active">
+        <a href="/dashboard" class="nav-item{% if request.path == '/dashboard' %} active{% endif %}">
             <div class="nav-icon">📊</div>
             <span>Dashboard</span>
         </a>
         
-        <!-- Call Data Section - Now contains only a Dashboard link -->
+        <!-- Call Data Section -->
         <a href="#callDataSubmenu" class="nav-item dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
-            <div class="nav-icon">📞</div>
+            <div class="nav-icon">📊</div>
             <span>Call Data</span>
-            <!-- Dropdown arrow icon removed -->
         </a>
         <div class="collapse" id="callDataSubmenu">
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a href="#" class="nav-link sub-item py-1">
+                    <a href="/call-data" class="nav-link sub-item py-1{% if request.path == '/call-data' %} active{% endif %}">
                         <div class="nav-icon">📊</div>
                         <span>Dashboard</span>
                     </a>
@@ -26,16 +25,15 @@
             </ul>
         </div>
         
-        <!-- Case Data Section - Now contains only a Dashboard link -->
-        <a href="#caseDataSubmenu" class="nav-item dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
-            <div class="nav-icon">📁</div>
+        <!-- Case Data Section -->
+        <a href="#caseDataSubmenu" class="nav-item dropdown-toggle{% if request.path == '/case-data' %} active{% endif %}" data-bs-toggle="collapse" aria-expanded="false">
+            <div class="nav-icon">📊</div>
             <span>Case Data</span>
-            <!-- Dropdown arrow icon removed -->
         </a>
         <div class="collapse" id="caseDataSubmenu">
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a href="#" class="nav-link sub-item py-1">
+                    <a href="/case-data" class="nav-link sub-item py-1{% if request.path == '/case-data' %} active{% endif %}">
                         <div class="nav-icon">📊</div>
                         <span>Dashboard</span>
                     </a>
@@ -43,50 +41,15 @@
             </ul>
         </div>
         
-        <!-- AI Services Section - Content unchanged, no dropdown arrow icon -->
-        <a href="#aiServicesSubmenu" class="nav-item dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
-            <div class="nav-icon">🤖</div>
+        <!-- AI Services Section -->
+        <a href="#aiServicesSubmenu" class="nav-item dropdown-toggle{% if request.path == '/ai-services' %} active{% endif %}" data-bs-toggle="collapse" aria-expanded="false">
+            <div class="nav-icon">📊</div>
             <span>AI Services</span>
         </a>
         <div class="collapse" id="aiServicesSubmenu">
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a href="#" class="nav-link sub-item py-1">
-                        <div class="nav-icon">🎤</div>
-                        <span>Transcription</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link sub-item py-1">
-                        <div class="nav-icon">🌐</div>
-                        <span>Translation</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link sub-item py-1">
-                        <div class="nav-icon">🏷️</div>
-                        <span>Classification</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link sub-item py-1">
-                        <div class="nav-icon">📊</div>
-                        <span>Analytics</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-        
-        <!-- Users and Roles Section - Now contains only a Dashboard link -->
-        <a href="#usersRolesSubmenu" class="nav-item dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
-            <div class="nav-icon">👥</div>
-            <span>Users & Roles</span>
-            <!-- Dropdown arrow icon removed -->
-        </a>
-        <div class="collapse" id="usersRolesSubmenu">
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a href="#" class="nav-link sub-item py-1">
+                    <a href="/ai-services" class="nav-link sub-item py-1{% if request.path == '/ai-services' %} active{% endif %}">
                         <div class="nav-icon">📊</div>
                         <span>Dashboard</span>
                     </a>
@@ -94,64 +57,91 @@
             </ul>
         </div>
         
+        <!-- Users and Roles Section -->
+        <a href="#usersRolesSubmenu" class="nav-item dropdown-toggle{% if request.path == '/users-roles' %} active{% endif %}" data-bs-toggle="collapse" aria-expanded="false">
+            <div class="nav-icon">📊</div>
+            <span>Users & Roles</span>
+        </a>
+        <div class="collapse" id="usersRolesSubmenu">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="/users-roles" class="nav-link sub-item py-1{% if request.path == '/users-roles' %} active{% endif %}">
+                        <div class="nav-icon">📊</div>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
         <!-- Contacts Section -->
-        <a href="#" class="nav-item">
-            <div class="nav-icon">📇</div>
+        <a href="#contactsSubmenu" class="nav-item dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
+            <div class="nav-icon">👥</div>
             <span>Contacts</span>
         </a>
+        <div class="collapse" id="contactsSubmenu">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="/contacts" class="nav-link sub-item py-1">
+                        <div class="nav-icon">📊</div>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
     </div>
 
     <!-- Resources Section -->
     <div class="nav-section">
         <div class="nav-title">Resources</div>
-        <a href="#" class="nav-item">
+        
+        <!-- System Services Section -->
+        <a href="#systemServicesSubmenu" class="nav-item dropdown-toggle{% if request.path == '/system-services' %} active{% endif %}" data-bs-toggle="collapse" aria-expanded="false">
             <div class="nav-icon">⚙️</div>
             <span>System Services</span>
         </a>
-        
-        <!-- System Data Section - Content unchanged, no dropdown arrow icon -->
-        <a href="#systemDataSubmenu" class="nav-item dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
-            <div class="nav-icon">🗃️</div>
-            <span>System Data</span>
-        </a>
-        <div class="collapse" id="systemDataSubmenu">
+        <div class="collapse" id="systemServicesSubmenu">
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a href="#" class="nav-link sub-item py-1">
-                        <div class="nav-icon">🗳️</div>
-                        <span>Electoral Data</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link sub-item py-1">
-                        <div class="nav-icon">🏫</div>
-                        <span>Schools</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link sub-item py-1">
-                        <div class="nav-icon">🏥</div>
-                        <span>Hospitals</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link sub-item py-1">
-                        <div class="nav-icon">👮</div>
-                        <span>Police Stations</span>
+                    <a href="/system-services" class="nav-link sub-item py-1{% if request.path == '/system-services' %} active{% endif %}">
+                        <div class="nav-icon">📊</div>
+                        <span>Dashboard</span>
                     </a>
                 </li>
             </ul>
         </div>
-        
-        <a href="#" class="nav-item">
-            <div class="nav-icon">💬</div>
+
+        <!-- Chatbot Section -->
+        <a href="#chatbotSubmenu" class="nav-item dropdown-toggle{% if request.path == '/chatbot' %} active{% endif %}" data-bs-toggle="collapse" aria-expanded="false">
+            <div class="nav-icon">🤖</div>
             <span>Chatbot</span>
         </a>
-        
-        <a href="#" class="nav-item">
+        <div class="collapse" id="chatbotSubmenu">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="/chatbot" class="nav-link sub-item py-1{% if request.path == '/chatbot' %} active{% endif %}">
+                        <div class="nav-icon">📊</div>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Documentation Section -->
+        <a href="#documentationSubmenu" class="nav-item dropdown-toggle{% if request.path == '/documentation' %} active{% endif %}" data-bs-toggle="collapse" aria-expanded="false">
             <div class="nav-icon">📚</div>
             <span>Documentation</span>
         </a>
+        <div class="collapse" id="documentationSubmenu">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="/documentation" class="nav-link sub-item py-1{% if request.path == '/documentation' %} active{% endif %}">
+                        <div class="nav-icon">📊</div>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
 
     <!-- Profile Section -->

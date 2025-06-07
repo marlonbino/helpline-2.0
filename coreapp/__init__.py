@@ -49,13 +49,43 @@ def create_app(config_name):
     app.register_blueprint(aibp, url_prefix="/aicore")
 
     # Register Asterisk Blueprints
-    import asterisk
-    # asterisk.init()
-    app.register_blueprint(asterisk.bp, url_prefix="/asterisk")
+    from asterisk import bp as asteriskbp
+    app.register_blueprint(asteriskbp, url_prefix="/asterisk")
 
-    # Register CDR Data Blueprints
-    from calldata import bp as cdrbp
-    app.register_blueprint(cdrbp, url_prefix="/calldata")
+    # Register User Data Blueprints
+    import userdata
+    # userdata.init()
+    app.register_blueprint(userdata.bp, url_prefix="/contacts")
+
+    # Add Users and Roles API Routes
+    @app.route('/api/users', methods=['POST'])
+    def add_user():
+        try:
+            data = request.get_json()
+            # TODO: Implement user creation logic
+            # For now, just return a mock response
+            return jsonify({
+                'username': data['username'],
+                'role': data['role'],
+                'status': data['status']
+            }), 201
+        except Exception as e:
+            logger.error(f"Error adding user: {str(e)}")
+            return jsonify({'error': str(e)}), 500
+
+    @app.route('/api/roles', methods=['POST'])
+    def add_role():
+        try:
+            data = request.get_json()
+            # TODO: Implement role creation logic
+            # For now, just return a mock response
+            return jsonify({
+                'name': data['roleName'],
+                'permissions': data['permissions']
+            }), 201
+        except Exception as e:
+            logger.error(f"Error adding role: {str(e)}")
+            return jsonify({'error': str(e)}), 500
 
     # Register Case Data Blueprints
     from casedata import bp as casebp
@@ -64,11 +94,6 @@ def create_app(config_name):
     # Register Chatbot Blueprints
     from chatbot import bp as chatbp
     app.register_blueprint(chatbp, url_prefix="/chatbot")
-
-    # Register Contacts Data Blueprints
-    import userdata
-    # userdata.init()
-    app.register_blueprint(userdata.bp, url_prefix="/contacts")
 
     logger.info("Completed Blueprint Registration")
 
@@ -119,7 +144,49 @@ def create_app(config_name):
     def dashboard():
         logger.info("Helpline Dashboard Page")
         # You can pass any necessary data to your dashboard template here
-        return render_template('dashboard.html', title="Dashboard")
+        return render_template('dashboard_content.html', title="Dashboard")
+
+    # Call Data Route
+    @app.route("/call-data", methods=['GET'])
+    def call_data():
+        logger.info("Helpline Call Data Page")
+        return render_template('call_data_content.html', title="Call Data")
+
+    # Case Data Route
+    @app.route("/case-data", methods=['GET'])
+    def case_data():
+        logger.info("Helpline Case Data Page")
+        return render_template('case_data_content.html', title="Case Data")
+
+    # AI Services Route
+    @app.route("/ai-services", methods=['GET'])
+    def ai_services():
+        logger.info("Helpline AI Services Page")
+        return render_template('ai_services_content.html', title="AI Services")
+
+    # Users & Roles Route
+    @app.route("/users-roles", methods=['GET'])
+    def users_roles():
+        logger.info("Helpline Users & Roles Page")
+        return render_template('users_roles_content.html', title="Users & Roles")
+
+    # System Services Route
+    @app.route("/system-services", methods=['GET'])
+    def system_services():
+        logger.info("Helpline System Services Page")
+        return render_template('system_services_content.html', title="System Services")
+
+    # Chatbot Route
+    @app.route("/chatbot", methods=['GET'])
+    def chatbot():
+        logger.info("Helpline Chatbot Page")
+        return render_template('chatbot_content.html', title="Chatbot")
+
+    # Documentation Route
+    @app.route("/documentation", methods=['GET'])
+    def documentation():
+        logger.info("Helpline Documentation Page")
+        return render_template('documentation_content.html', title="Documentation")
 
     # Call Center Routes
     @app.route("/calls/form", methods=['GET'])

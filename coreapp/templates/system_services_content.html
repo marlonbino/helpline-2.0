@@ -1,0 +1,149 @@
+{% extends "dashboard.html" %}
+
+{% block page_content %}
+    <div class="header">
+        <h1>System Services</h1>
+        <div class="header-actions">
+            <button class="btn btn-primary btn-sm">
+                <i class="bi bi-tools"></i> System Tools
+            </button>
+            <button class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-graph-up"></i> Performance Report
+            </button>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">⚙️</div>
+            <div class="stat-label">System Status</div>
+            <div class="stat-value">99.8%</div>
+            <div class="stat-change stat-positive">↗ +0.5%</div>
+            <div class="stat-footer">
+                <div class="stat-footer-item">
+                    <span class="stat-footer-label">Last Check:</span>
+                    <span class="stat-footer-value">5 minutes ago</span>
+                </div>
+                <div class="stat-footer-item">
+                    <span class="stat-footer-label">Uptime:</span>
+                    <span class="stat-footer-value">99.95%</span>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">💾</div>
+            <div class="stat-label">Storage Usage</div>
+            <div class="stat-value">24%</div>
+            <div class="stat-footer">
+                <div class="stat-footer-item">
+                    <span class="stat-footer-label">Used:</span>
+                    <span class="stat-footer-value">1.2TB</span>
+                </div>
+                <div class="stat-footer-item">
+                    <span class="stat-footer-label">Available:</span>
+                    <span class="stat-footer-value">3.8TB</span>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📡</div>
+            <div class="stat-label">Network Latency</div>
+            <div class="stat-value">25ms</div>
+            <div class="stat-change stat-positive">↓ -5ms</div>
+            <div class="stat-footer">
+                <div class="stat-footer-item">
+                    <span class="stat-footer-label">Jitter:</span>
+                    <span class="stat-footer-value">1ms</span>
+                </div>
+                <div class="stat-footer-item">
+                    <span class="stat-footer-label">Packet Loss:</span>
+                    <span class="stat-footer-value">0.01%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="services-section">
+        <div class="service-group">
+            <div class="service-header">
+                <div class="service-icon">📊</div>
+                <div class="service-title">Performance Metrics</div>
+                <button class="btn btn-link btn-sm p-0">
+                    <i class="bi bi-three-dots-vertical"></i>
+                </button>
+            </div>
+            <div class="service-stats">
+                <div class="stat-item">
+                    <div class="stat-label">CPU Load</div>
+                    <div class="stat-value">32%</div>
+                    <div class="stat-badge">Stable</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Memory Usage</div>
+                    <div class="stat-value">65%</div>
+                    <div class="stat-badge">Normal</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Bandwidth</div>
+                    <div class="stat-value">1.5Gbps</div>
+                    <div class="stat-badge">High</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="service-group">
+            <div class="service-header">
+                <div class="service-icon">💾</div>
+                <div class="service-title">Storage Details</div>
+                <button class="btn btn-link btn-sm p-0">
+                    <i class="bi bi-three-dots-vertical"></i>
+                </button>
+            </div>
+            <div class="service-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Used Space</div>
+                    <div class="stat-value">1.2TB</div>
+                    <div class="stat-badge">24%</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Available Space</div>
+                    <div class="stat-value">3.8TB</div>
+                    <div class="stat-badge">76%</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Total Space</div>
+                    <div class="stat-value">5TB</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="service-group">
+            <div class="service-header">
+                <div class="service-icon">⚡</div>
+                <div class="service-title">System Health</div>
+                <button class="btn btn-link btn-sm p-0">
+                    <i class="bi bi-three-dots-vertical"></i>
+                </button>
+            </div>
+            <div class="service-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Response Time</div>
+                    <div class="stat-value">1.2s</div>
+                    <div class="stat-change stat-positive">↓ -15%</div>
+                    <div class="stat-badge">Good</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Performance Score</div>
+                    <div class="stat-value">97.5%</div>
+                    <div class="stat-change stat-positive">↗ +2.1%</div>
+                    <div class="stat-badge">Excellent</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Health Status</div>
+                    <div class="stat-value">Green</div>
+                    <div class="stat-badge">Healthy</div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

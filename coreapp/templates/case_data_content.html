@@ -1,0 +1,83 @@
+{% extends "dashboard.html" %}
+
+{% block page_content %}
+    <div class="header">
+        <h1>Case Data</h1>
+    </div>
+
+    <div class="case-data-container">
+        <div class="case-stats">
+            <div class="stat-card">
+                <div class="stat-label">Active Cases</div>
+                <div class="stat-value">156</div>
+                <div class="stat-change stat-positive">↗ +8.2%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Resolved Cases</div>
+                <div class="stat-value">89</div>
+                <div class="stat-change stat-positive">↗ +15.4%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Average Resolution Time</div>
+                <div class="stat-value">3d 12h</div>
+                <div class="stat-change stat-positive">↓ -2.5%</div>
+            </div>
+        </div>
+
+        <div class="case-category-grid">
+            <div class="category-card">
+                <div class="category-header">
+                    <h2>Case Categories</h2>
+                    <div class="category-filters">
+                        <button class="filter-btn active">All</button>
+                        <button class="filter-btn">Active</button>
+                        <button class="filter-btn">Resolved</button>
+                    </div>
+                </div>
+                <div class="category-list">
+                    <div class="category-item">
+                        <div class="category-name">Child Abuse</div>
+                        <div class="category-count">42</div>
+                        <div class="category-percentage">28%</div>
+                    </div>
+                    <div class="category-item">
+                        <div class="category-name">GBV Cases</div>
+                        <div class="category-count">32</div>
+                        <div class="category-percentage">21%</div>
+                    </div>
+                    <div class="category-item">
+                        <div class="category-name">Counseling</div>
+                        <div class="category-count">28</div>
+                        <div class="category-percentage">19%</div>
+                    </div>
+                    <div class="category-item">
+                        <div class="category-name">Family Issues</div>
+                        <div class="category-count">18</div>
+                        <div class="category-percentage">12%</div>
+                    </div>
+                    <div class="category-item">
+                        <div class="category-name">School Problems</div>
+                        <div class="category-count">15</div>
+                        <div class="category-percentage">10%</div>
+                    </div>
+                    <div class="category-item">
+                        <div class="category-name">Mental Health</div>
+                        <div class="category-count">12</div>
+                        <div class="category-percentage">8%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
+</script>
+{% endblock %}
