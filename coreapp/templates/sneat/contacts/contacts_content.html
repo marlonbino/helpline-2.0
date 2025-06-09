@@ -1,0 +1,546 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+    <div class="header">
+        <div class="header-left">
+            <h1>Contacts Dashboard</h1>
+            <div class="header-subtitle">Manage and analyze contact relationships in real-time</div>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-primary" onclick="openNewContactForm()">
+                <i class="fas fa-plus"></i> New Contact
+            </button>
+            <button class="btn btn-outline-primary" onclick="exportContactData()">
+                <i class="fas fa-download"></i> Export
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Actions Bar -->
+    <div class="quick-actions">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="contactSearch" placeholder="Search contacts...">
+        </div>
+        <div class="filter-group">
+            <select id="categoryFilter" class="filter-select">
+                <option value="">All Categories</option>
+                <option value="customer">Customer</option>
+                <option value="supplier">Supplier</option>
+                <option value="partner">Partner</option>
+                <option value="vendor">Vendor</option>
+                <option value="client">Client</option>
+            </select>
+            <select id="statusFilter" class="filter-select">
+                <option value="">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="prospect">Prospect</option>
+                <option value="lead">Lead</option>
+            </select>
+            <select id="timeFilter" class="filter-select">
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="quarter">This Quarter</option>
+                <option value="year">This Year</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-label">Total Contacts</div>
+            <div class="stat-value" id="totalContacts">2,845</div>
+            <div class="stat-change stat-positive">↗ +8.3%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Active:</span>
+                <span class="stat-footer-value" id="activeContacts">1,567</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📞</div>
+            <div class="stat-label">Contact Reach</div>
+            <div class="stat-value" id="contactReach">94.2%</div>
+            <div class="stat-change stat-positive">↗ +2.1%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Response Rate:</span>
+                <span class="stat-footer-value" id="responseRate">87.5%</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📧</div>
+            <div class="stat-label">Email Engagement</div>
+            <div class="stat-value" id="emailEngagement">87.5%</div>
+            <div class="stat-change stat-positive">↗ +5.2%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Open Rate:</span>
+                <span class="stat-footer-value" id="openRate">78.3%</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🌍</div>
+            <div class="stat-label">Geographic Coverage</div>
+            <div class="stat-value" id="geoCoverage">15</div>
+            <div class="stat-change stat-positive">↗ +3</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Countries:</span>
+                <span class="stat-footer-value" id="countries">12</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Content -->
+    <div class="dashboard-grid">
+        <!-- Contact Growth Trends -->
+        <div class="chart-card full-width">
+            <div class="chart-header">
+                <h3>Contact Growth Trends</h3>
+                <div class="chart-actions">
+                    <button class="btn btn-sm btn-outline-secondary active" data-view="growth">Growth</button>
+                    <button class="btn btn-sm btn-outline-secondary" data-view="engagement">Engagement</button>
+                    <button class="btn btn-sm btn-outline-secondary" data-view="geographic">Geographic</button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="contactTrendsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Contact Distribution -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Contact Distribution</h3>
+                <div class="chart-actions">
+                    <select class="filter-select" id="distributionType">
+                        <option value="category">By Category</option>
+                        <option value="status">By Status</option>
+                        <option value="region">By Region</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="contactDistributionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Engagement Performance -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Engagement Performance</h3>
+                <div class="chart-actions">
+                    <select class="filter-select" id="engagementMetric">
+                        <option value="response">Response Rate</option>
+                        <option value="email">Email Open Rate</option>
+                        <option value="interaction">Interaction Rate</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="engagementChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="activity-card">
+            <div class="card-header">
+                <h3>Recent Activity</h3>
+                <button class="btn btn-sm btn-link" onclick="refreshActivity()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+            <div class="activity-list" id="recentActivity">
+                <!-- Activity items will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Contacts Table -->
+    <div class="table-card">
+        <div class="card-header">
+            <h3>All Contacts</h3>
+            <div class="table-actions">
+                <button class="btn btn-sm btn-outline-secondary" onclick="refreshTable()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="toggleColumns()">
+                    <i class="fas fa-columns"></i>
+                </button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table" id="contactsTable">
+                <thead>
+                    <tr>
+                        <th>Contact ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Region</th>
+                        <th>Last Contact</th>
+                        <th>Engagement</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Contact rows will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+        <div class="table-footer">
+            <div class="table-info">
+                Showing <span id="tableStart">1</span> to <span id="tableEnd">10</span> of <span id="tableTotal">0</span> contacts
+            </div>
+            <div class="pagination" id="tablePagination">
+                <!-- Pagination will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Initialize dashboard when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing contacts dashboard with static data...');
+    initializeCharts();
+    loadContactData();
+    setupEventListeners();
+    startRealTimeUpdates();
+});
+
+function initializeCharts() {
+    console.log('Creating contact charts with static data...');
+    
+    // Contact Trends Chart
+    const trendsCtx = document.getElementById('contactTrendsChart').getContext('2d');
+    const growthData = [120, 145, 178, 195, 220, 245, 268, 285];
+    const trendsEngagementData = [85, 92, 88, 95, 91, 94, 89, 96];
+    
+    console.log('Contact Trends Chart - Growth data:', growthData);
+    console.log('Contact Trends Chart - Engagement data:', trendsEngagementData);
+    
+    new Chart(trendsCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+            datasets: [{
+                label: 'New Contacts',
+                data: growthData,
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }, {
+                label: 'Engagement Rate',
+                data: trendsEngagementData,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Contact Distribution Chart
+    const distributionCtx = document.getElementById('contactDistributionChart').getContext('2d');
+    const distributionData = [1245, 478, 189, 567, 366];
+    
+    console.log('Contact Distribution Chart data:', distributionData);
+    
+    new Chart(distributionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Customers', 'Suppliers', 'Partners', 'Vendors', 'Clients'],
+            datasets: [{
+                data: distributionData,
+                backgroundColor: [
+                    '#ef4444',
+                    '#f59e0b',
+                    '#10b981',
+                    '#3b82f6',
+                    '#8b5cf6'
+                ],
+                borderColor: [
+                    '#dc2626',
+                    '#d97706',
+                    '#059669',
+                    '#2563eb',
+                    '#7c3aed'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            cutout: '60%'
+        }
+    });
+
+    // Engagement Performance Chart
+    const engagementCtx = document.getElementById('engagementChart').getContext('2d');
+    const performanceData = [87.5, 78.3, 92.1, 85.7, 89.4];
+    
+    console.log('Engagement Chart data:', performanceData);
+    
+    new Chart(engagementCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Email Open', 'Response Rate', 'Click Rate', 'Conversion', 'Retention'],
+            datasets: [{
+                label: 'Engagement Rate (%)',
+                data: performanceData,
+                backgroundColor: '#3b82f6',
+                borderColor: '#2563eb',
+                borderWidth: 1,
+                borderRadius: 4,
+                maxBarThickness: 30
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Engagement Rate: ${context.raw}%`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    console.log('All contact charts initialized successfully with static data!');
+}
+
+function loadContactData() {
+    // Update activity list with sample data
+    const activityList = document.getElementById('recentActivity');
+    if (activityList) {
+        const activities = [
+            { type: 'contact', title: 'New Contact Added', description: 'John Smith added as new customer', time: '2 minutes ago' },
+            { type: 'email', title: 'Email Campaign Sent', description: 'Monthly newsletter sent to 2,500 contacts', time: '15 minutes ago' },
+            { type: 'engagement', title: 'High Engagement Alert', description: 'Contact engagement rate increased by 15%', time: '1 hour ago' },
+            { type: 'system', title: 'Data Sync Complete', description: 'Contact database synchronized successfully', time: '2 hours ago' }
+        ];
+
+        activityList.innerHTML = activities.map(activity => `
+            <div class="activity-item">
+                <div class="activity-icon ${activity.type}">${getActivityIcon(activity.type)}</div>
+                <div class="activity-content">
+                    <div class="activity-title">${activity.title}</div>
+                    <div class="activity-description">${activity.description}</div>
+                    <div class="activity-time">${activity.time}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+// Utility function to get activity icon
+function getActivityIcon(type) {
+    const icons = {
+        'contact': '👥',
+        'email': '📧',
+        'engagement': '📈',
+        'system': '⚙️'
+    };
+    return icons[type] || '📌';
+}
+
+function setupEventListeners() {
+    // Search input
+    const searchInput = document.getElementById('contactSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(function(e) {
+            filterContacts();
+        }, 300));
+    }
+
+    // Filter selects
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', filterContacts);
+    }
+    
+    const statusFilter = document.getElementById('statusFilter');
+    if (statusFilter) {
+        statusFilter.addEventListener('change', filterContacts);
+    }
+    
+    const timeFilter = document.getElementById('timeFilter');
+    if (timeFilter) {
+        timeFilter.addEventListener('change', filterContacts);
+    }
+    
+    const distributionType = document.getElementById('distributionType');
+    if (distributionType) {
+        distributionType.addEventListener('change', updateDistributionChart);
+    }
+    
+    const engagementMetric = document.getElementById('engagementMetric');
+    if (engagementMetric) {
+        engagementMetric.addEventListener('change', updateEngagementChart);
+    }
+
+    // Chart view buttons
+    document.querySelectorAll('.chart-actions .btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.chart-actions .btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            updateTrendsChart(this.dataset.view);
+        });
+    });
+}
+
+function startRealTimeUpdates() {
+    // Implement real-time updates using WebSocket or polling
+    setInterval(updateDashboard, 30000); // Update every 30 seconds
+}
+
+// Utility functions
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+function filterContacts() {
+    // Implement contact filtering logic
+    console.log('Filtering contacts...');
+}
+
+function updateDistributionChart() {
+    // Implement distribution chart update logic
+    console.log('Updating distribution chart...');
+}
+
+function updateEngagementChart() {
+    // Implement engagement chart update logic
+    console.log('Updating engagement chart...');
+}
+
+function updateTrendsChart(view) {
+    // Implement trends chart update logic
+    console.log('Updating trends chart with view:', view);
+}
+
+function refreshActivity() {
+    // Implement activity refresh logic
+    console.log('Refreshing activity...');
+    loadContactData();
+}
+
+function openNewContactForm() {
+    // Implement new contact form opening logic
+    console.log('Opening new contact form...');
+}
+
+function exportContactData() {
+    // Implement contact data export logic
+    console.log('Exporting contact data...');
+}
+
+function refreshTable() {
+    // Implement table refresh logic
+    console.log('Refreshing table...');
+}
+
+function toggleColumns() {
+    // Implement column visibility toggle logic
+    console.log('Toggling columns...');
+}
+
+function updateDashboard() {
+    // Implement dashboard update logic
+    console.log('Updating dashboard...');
+}
+</script>
+{% endblock %}

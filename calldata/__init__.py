@@ -35,31 +35,30 @@ curl -X POST "localhost:50001/calldata/{create, data, action, stats, index}/item
 --data "{}"
 """
 @bp.route("/", methods=['GET'])
-@bp.route("/index", methods=['GET'])
-def index():
+@bp.route("/<index>", methods=['GET'])
+def index(index=False):
     logger.debug("""CDR-Data Web Pages""")
 
     try:
 
         data = {}
         x = request.args.to_dict()
+        # Remove dashboard dependency - just use empty data for now
+        # x = dashboard.indexweb(x)
 
-        if x.get('userid') is None:
-            logger.debug("""CDR-Data Create""")
-            return render_template('viewone/calldata/index.html')
-
-        x = dashboard.indexweb(x)
+        if not index:
+            logger.debug("""CDR-Dashboard""")
+            index = 'index'
         
-        if x.get('item') is not None:
-            logger.debug("""CDR-Data Template""")
-            return render_template('viewone/calldata/' + x.get(
-                'item') + '.html', data=x.get('data'))
+        
+        logger.debug("""CDR-Data Template""")
+        return render_template('sneat/calldata/' + index + '.html', data=x.get('data'))
 
     except Exception as e:
         data['error'] = "Error Index-Template CDR-Data {}".format(e)
         logger.critical(data['error'])
 
-    return render_template('viewone/errors/404.html')
+    return render_template('./errors/404.html')
 
 
 @bp.route("/data/<filename>", methods=['POST'])
@@ -94,7 +93,7 @@ def data(filename):
 
 @bp.route("/action/<filename>", methods=['POST'])
 def action(filename):
-    logger.debug("""CDR-Data Action: """ + filepath)
+    logger.debug("""CDR-Data Action: """ + filename)
 
     try:
 
@@ -119,7 +118,7 @@ def action(filename):
 
 @bp.route("/stats/<filename>", methods=['POST'])
 def stats(filename):
-    logger.debug("""CDR-Data Stats: """ + filepath)
+    logger.debug("""CDR-Data Stats: """ + filename)
 
     try:
 
@@ -145,7 +144,7 @@ def stats(filename):
 
 @bp.route("/reset/<filename>", methods=['POST'])
 def resets(filename):
-    logger.debug("""CDR-Data Reset: """ + filepath)
+    logger.debug("""CDR-Data Reset: """ + filename)
 
     try:
 

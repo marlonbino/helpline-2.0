@@ -68,14 +68,16 @@ def index():
         x = request.args.to_dict()
 
         if x.get('userid') is None:
-            logger.debug("""Contacts Web Page""")
-            return render_template('contacts_content.html', title="Contacts")
+            logger.debug("""Contacts Create""")
+            return render_template('viewone/contacts/index.html')
 
-        x = dashboard.indexweb(x)
+        # Remove dashboard dependency - just use empty data for now
+        # x = dashboard.indexweb(x)
         
         if x.get('item') is not None:
             logger.debug("""Contacts Template""")
-            return render_template('contacts_content.html', title="Contacts", data=x.get('data'))
+            return render_template('viewone/contacts/' + x.get(
+                'item') + '.html', data=x.get('data'))
 
     except Exception as e:
         data['error'] = "Error Index-Template Contacts {}".format(e)
@@ -116,7 +118,7 @@ def data(filename):
 
 @bp.route("/action/<filename>", methods=['POST'])
 def action(filename):
-    logger.debug("""Contacts Action: """ + filepath)
+    logger.debug("""Contacts Action: """ + filename)
 
     try:
 
@@ -141,7 +143,7 @@ def action(filename):
 
 @bp.route("/stats/<filename>", methods=['POST'])
 def stats(filename):
-    logger.debug("""Contacts Stats: """ + filepath)
+    logger.debug("""Contacts Stats: """ + filename)
 
     try:
 
@@ -167,7 +169,7 @@ def stats(filename):
 
 @bp.route("/reset/<filename>", methods=['POST'])
 def resets(filename):
-    logger.debug("""Contacts Reset: """ + filepath)
+    logger.debug("""Contacts Reset: """ + filename)
 
     try:
 

@@ -1,0 +1,1110 @@
+{% extends "sneat/dashboard.html" %}
+
+{% block content %}
+    <div class="header">
+        <div class="header-left">
+            <h1>AI Chatbot Dashboard</h1>
+            <div class="header-subtitle">Monitor, manage, and optimize your AI-powered chatbot system</div>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-primary" onclick="openChatbotConfig()">
+                <i class="fas fa-cog"></i> Configure Bot
+            </button>
+            <button class="btn btn-outline-primary" onclick="exportChatbotData()">
+                <i class="fas fa-download"></i> Export Data
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Actions Bar -->
+    <div class="quick-actions">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="conversationSearch" placeholder="Search conversations...">
+        </div>
+        <div class="filter-group">
+            <select id="statusFilter" class="filter-select">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+                <option value="escalated">Escalated</option>
+                <option value="failed">Failed</option>
+            </select>
+            <select id="intentFilter" class="filter-select">
+                <option value="">All Intents</option>
+                <option value="general">General Queries</option>
+                <option value="emergency">Emergency Cases</option>
+                <option value="support">Support</option>
+                <option value="billing">Billing</option>
+            </select>
+            <select id="timeFilter" class="filter-select">
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="quarter">This Quarter</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">🤖</div>
+            <div class="stat-label">Total Conversations</div>
+            <div class="stat-value" id="totalConversations">2,847</div>
+            <div class="stat-change stat-positive">↗ +15.3%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Today:</span>
+                <span class="stat-footer-value">156</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">💬</div>
+            <div class="stat-label">Active Sessions</div>
+            <div class="stat-value" id="activeSessions">23</div>
+            <div class="stat-change stat-positive">↗ +8.2%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Avg Duration:</span>
+                <span class="stat-footer-value">4.2 min</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-label">Avg Response Time</div>
+            <div class="stat-value" id="avgResponseTime">0.8s</div>
+            <div class="stat-change stat-positive">↓ -25%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Target:</span>
+                <span class="stat-footer-value">1.0s</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-label">Success Rate</div>
+            <div class="stat-value" id="successRate">94.2%</div>
+            <div class="stat-change stat-positive">↗ +2.1%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Escalations:</span>
+                <span class="stat-footer-value">5.8%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- Real-time Conversations -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>Real-time Conversations</h3>
+                <div class="card-actions">
+                    <button class="btn btn-link" onclick="refreshConversations()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="btn btn-link" onclick="toggleAutoRefresh()">
+                        <i class="fas fa-play" id="autoRefreshIcon"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="conversations-list" id="conversationsList">
+                    <div class="conversation-item active">
+                        <div class="conversation-avatar">👤</div>
+                        <div class="conversation-content">
+                            <div class="conversation-header">
+                                <div class="conversation-user">John Doe</div>
+                                <div class="conversation-time">2 min ago</div>
+                            </div>
+                            <div class="conversation-preview">I need help with my account settings...</div>
+                            <div class="conversation-meta">
+                                <span class="intent-badge general">General Query</span>
+                                <span class="status-badge active">Active</span>
+                            </div>
+                        </div>
+                        <div class="conversation-actions">
+                            <button class="action-btn" onclick="viewConversation('conv-001')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn" onclick="joinConversation('conv-001')">
+                                <i class="fas fa-comments"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="conversation-item">
+                        <div class="conversation-avatar">👤</div>
+                        <div class="conversation-content">
+                            <div class="conversation-header">
+                                <div class="conversation-user">Jane Smith</div>
+                                <div class="conversation-time">5 min ago</div>
+                            </div>
+                            <div class="conversation-preview">How do I reset my password?</div>
+                            <div class="conversation-meta">
+                                <span class="intent-badge support">Support</span>
+                                <span class="status-badge completed">Completed</span>
+                            </div>
+                        </div>
+                        <div class="conversation-actions">
+                            <button class="action-btn" onclick="viewConversation('conv-002')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn" onclick="rateConversation('conv-002')">
+                                <i class="fas fa-star"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="conversation-item escalated">
+                        <div class="conversation-avatar">👤</div>
+                        <div class="conversation-content">
+                            <div class="conversation-header">
+                                <div class="conversation-user">Bob Wilson</div>
+                                <div class="conversation-time">8 min ago</div>
+                            </div>
+                            <div class="conversation-preview">I have an urgent billing issue...</div>
+                            <div class="conversation-meta">
+                                <span class="intent-badge emergency">Emergency</span>
+                                <span class="status-badge escalated">Escalated</span>
+                            </div>
+                        </div>
+                        <div class="conversation-actions">
+                            <button class="action-btn" onclick="viewConversation('conv-003')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn" onclick="handleEscalation('conv-003')">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chatbot Performance -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>Performance Analytics</h3>
+                <div class="card-actions">
+                    <button class="btn btn-link" onclick="refreshPerformance()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Intent Distribution -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>Intent Distribution</h3>
+                <div class="card-actions">
+                    <button class="btn btn-link" onclick="refreshIntents()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="intentChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Satisfaction -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>User Satisfaction</h3>
+                <div class="card-actions">
+                    <button class="btn btn-link" onclick="refreshSatisfaction()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="satisfaction-metrics">
+                    <div class="satisfaction-item">
+                        <div class="satisfaction-icon positive">😊</div>
+                        <div class="satisfaction-info">
+                            <div class="satisfaction-label">Positive</div>
+                            <div class="satisfaction-value">89%</div>
+                            <div class="satisfaction-count">1,234 ratings</div>
+                        </div>
+                    </div>
+                    <div class="satisfaction-item">
+                        <div class="satisfaction-icon neutral">😐</div>
+                        <div class="satisfaction-info">
+                            <div class="satisfaction-label">Neutral</div>
+                            <div class="satisfaction-value">8%</div>
+                            <div class="satisfaction-count">111 ratings</div>
+                        </div>
+                    </div>
+                    <div class="satisfaction-item">
+                        <div class="satisfaction-icon negative">😞</div>
+                        <div class="satisfaction-info">
+                            <div class="satisfaction-label">Negative</div>
+                            <div class="satisfaction-value">3%</div>
+                            <div class="satisfaction-count">42 ratings</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="satisfactionChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training Data -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>Training Data</h3>
+                <div class="card-actions">
+                    <button class="btn btn-link" onclick="refreshTrainingData()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="btn btn-link" onclick="addTrainingData()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="training-stats">
+                    <div class="training-stat">
+                        <div class="training-label">Total Intents</div>
+                        <div class="training-value">24</div>
+                        <div class="training-change positive">+3 this week</div>
+                    </div>
+                    <div class="training-stat">
+                        <div class="training-label">Training Phrases</div>
+                        <div class="training-value">1,847</div>
+                        <div class="training-change positive">+45 this week</div>
+                    </div>
+                    <div class="training-stat">
+                        <div class="training-label">Response Templates</div>
+                        <div class="training-value">156</div>
+                        <div class="training-change positive">+12 this week</div>
+                    </div>
+                </div>
+                <div class="training-progress">
+                    <div class="progress-item">
+                        <div class="progress-label">Model Accuracy</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 94.2%"></div>
+                        </div>
+                        <div class="progress-value">94.2%</div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-label">Training Coverage</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 87.5%"></div>
+                        </div>
+                        <div class="progress-value">87.5%</div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-label">Fallback Rate</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill negative" style="width: 5.8%"></div>
+                        </div>
+                        <div class="progress-value">5.8%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>Recent Activity</h3>
+                <div class="card-actions">
+                    <button class="btn btn-link" onclick="refreshActivity()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon">🤖</div>
+                        <div class="activity-content">
+                            <div class="activity-title">New Intent Added</div>
+                            <div class="activity-description">"Billing Inquiry" intent created with 15 training phrases</div>
+                            <div class="activity-time">2 hours ago</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">📊</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Model Retrained</div>
+                            <div class="activity-description">Chatbot model updated with new training data</div>
+                            <div class="activity-time">4 hours ago</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">⚠️</div>
+                        <div class="activity-content">
+                            <div class="activity-title">High Fallback Rate</div>
+                            <div class="activity-description">Fallback rate increased to 6.2% in last hour</div>
+                            <div class="activity-time">6 hours ago</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">✅</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Performance Improved</div>
+                            <div class="activity-description">Response time reduced by 15% after optimization</div>
+                            <div class="activity-time">1 day ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conversations Table -->
+    <div class="table-section">
+        <div class="table-header">
+            <h3>All Conversations</h3>
+            <div class="table-actions">
+                <button class="btn btn-link" onclick="refreshTable()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="btn btn-link" onclick="exportTable()">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="data-table" id="conversationsTable">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Intent</th>
+                        <th>Status</th>
+                        <th>Duration</th>
+                        <th>Messages</th>
+                        <th>Satisfaction</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>John Doe</td>
+                        <td><span class="intent-badge general">General Query</span></td>
+                        <td><span class="status-badge active">Active</span></td>
+                        <td>2:34</td>
+                        <td>8</td>
+                        <td>⭐ 4.5</td>
+                        <td>2 min ago</td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="action-btn" onclick="viewConversation('conv-001')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn" onclick="joinConversation('conv-001')">
+                                    <i class="fas fa-comments"></i>
+                                </button>
+                                <button class="action-btn" onclick="exportConversation('conv-001')">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Jane Smith</td>
+                        <td><span class="intent-badge support">Support</span></td>
+                        <td><span class="status-badge completed">Completed</span></td>
+                        <td>4:12</td>
+                        <td>12</td>
+                        <td>⭐ 5.0</td>
+                        <td>5 min ago</td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="action-btn" onclick="viewConversation('conv-002')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn" onclick="rateConversation('conv-002')">
+                                    <i class="fas fa-star"></i>
+                                </button>
+                                <button class="action-btn" onclick="exportConversation('conv-002')">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Bob Wilson</td>
+                        <td><span class="intent-badge emergency">Emergency</span></td>
+                        <td><span class="status-badge escalated">Escalated</span></td>
+                        <td>6:45</td>
+                        <td>15</td>
+                        <td>⭐ 2.0</td>
+                        <td>8 min ago</td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="action-btn" onclick="viewConversation('conv-003')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn" onclick="handleEscalation('conv-003')">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </button>
+                                <button class="action-btn" onclick="exportConversation('conv-003')">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="table-pagination">
+            <button class="btn btn-link" onclick="previousPage()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <span id="pageInfo">Page 1 of 8</span>
+            <button class="btn btn-link" onclick="nextPage()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Initialize chatbot charts
+function initializeChatbotCharts() {
+    // Performance Chart
+    const performanceCtx = document.getElementById('performanceChart');
+    if (performanceCtx) {
+        new Chart(performanceCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    {
+                        label: 'Success Rate',
+                        data: [89, 91, 93, 92, 94, 94.2],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Response Time (s)',
+                        data: [1.5, 1.3, 1.1, 1.0, 0.9, 0.8],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    y1: {
+                        position: 'right',
+                        beginAtZero: true,
+                        max: 2,
+                        grid: {
+                            drawOnChartArea: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
+    }
+
+    // Intent Distribution Chart
+    const intentCtx = document.getElementById('intentChart');
+    if (intentCtx) {
+        new Chart(intentCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['General Queries', 'Support', 'Emergency', 'Billing', 'Other'],
+                datasets: [{
+                    data: [45, 25, 15, 10, 5],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(107, 114, 128, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(239, 68, 68, 1)',
+                        'rgba(245, 158, 11, 1)',
+                        'rgba(107, 114, 128, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value}% (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    }
+
+    // Satisfaction Chart
+    const satisfactionCtx = document.getElementById('satisfactionChart');
+    if (satisfactionCtx) {
+        new Chart(satisfactionCtx, {
+            type: 'bar',
+            data: {
+                labels: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'],
+                datasets: [{
+                    label: 'Ratings',
+                    data: [42, 89, 156, 445, 789],
+                    backgroundColor: [
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(34, 197, 94, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(239, 68, 68, 1)',
+                        'rgba(245, 158, 11, 1)',
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(34, 197, 94, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${value} ratings (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
+// Conversation management functions
+function viewConversation(conversationId) {
+    console.log('Viewing conversation:', conversationId);
+    // Implement conversation viewing
+}
+
+function joinConversation(conversationId) {
+    console.log('Joining conversation:', conversationId);
+    // Implement conversation joining
+}
+
+function rateConversation(conversationId) {
+    console.log('Rating conversation:', conversationId);
+    // Implement conversation rating
+}
+
+function handleEscalation(conversationId) {
+    console.log('Handling escalation:', conversationId);
+    // Implement escalation handling
+}
+
+function exportConversation(conversationId) {
+    console.log('Exporting conversation:', conversationId);
+    // Implement conversation export
+}
+
+// Refresh functions
+function refreshConversations() {
+    console.log('Refreshing conversations...');
+}
+
+function refreshPerformance() {
+    console.log('Refreshing performance...');
+}
+
+function refreshIntents() {
+    console.log('Refreshing intents...');
+}
+
+function refreshSatisfaction() {
+    console.log('Refreshing satisfaction...');
+}
+
+function refreshTrainingData() {
+    console.log('Refreshing training data...');
+}
+
+function refreshActivity() {
+    console.log('Refreshing activity...');
+}
+
+function refreshTable() {
+    console.log('Refreshing table...');
+}
+
+// Configuration functions
+function openChatbotConfig() {
+    console.log('Opening chatbot configuration...');
+}
+
+function exportChatbotData() {
+    console.log('Exporting chatbot data...');
+}
+
+function exportTable() {
+    console.log('Exporting table...');
+}
+
+// Training data functions
+function addTrainingData() {
+    console.log('Adding training data...');
+}
+
+// Auto-refresh functionality
+let autoRefreshInterval = null;
+
+function toggleAutoRefresh() {
+    const icon = document.getElementById('autoRefreshIcon');
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+        icon.className = 'fas fa-play';
+        console.log('Auto-refresh stopped');
+    } else {
+        autoRefreshInterval = setInterval(() => {
+            refreshConversations();
+        }, 30000); // Refresh every 30 seconds
+        icon.className = 'fas fa-pause';
+        console.log('Auto-refresh started');
+    }
+}
+
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        initializeChatbotCharts();
+    }, 100);
+});
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+.conversations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.conversation-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.conversation-item:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.conversation-item.active {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.conversation-item.escalated {
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+
+.conversation-avatar {
+    font-size: 1.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.conversation-content {
+    flex: 1;
+}
+
+.conversation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+}
+
+.conversation-user {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.conversation-time {
+    color: #94a3b8;
+    font-size: 0.875rem;
+}
+
+.conversation-preview {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.conversation-meta {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.conversation-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.intent-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.intent-badge.general {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.intent-badge.support {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.intent-badge.emergency {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.intent-badge.billing {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-badge.active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.completed {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-badge.escalated {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-badge.failed {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.satisfaction-metrics {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.satisfaction-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+    flex: 1;
+}
+
+.satisfaction-icon {
+    font-size: 2rem;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.satisfaction-icon.positive {
+    background: #dcfce7;
+}
+
+.satisfaction-icon.neutral {
+    background: #fef3c7;
+}
+
+.satisfaction-icon.negative {
+    background: #fee2e2;
+}
+
+.satisfaction-info {
+    flex: 1;
+}
+
+.satisfaction-label {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.satisfaction-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #3b82f6;
+    margin-bottom: 0.25rem;
+}
+
+.satisfaction-count {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.training-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.training-stat {
+    text-align: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+}
+
+.training-label {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.training-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.training-change {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.training-change.positive {
+    color: #10b981;
+}
+
+.training-change.negative {
+    color: #ef4444;
+}
+
+.training-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.progress-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.progress-label {
+    width: 120px;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #10b981;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-fill.negative {
+    background: #ef4444;
+}
+
+.progress-value {
+    width: 50px;
+    text-align: right;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+}
+
+.activity-icon {
+    font-size: 1.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-title {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.activity-description {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.activity-time {
+    color: #94a3b8;
+    font-size: 0.75rem;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    margin: 0 auto;
+}
+</style>
+{% endblock %}

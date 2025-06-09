@@ -1,1 +1,0 @@
-# Helpline Resources Definition

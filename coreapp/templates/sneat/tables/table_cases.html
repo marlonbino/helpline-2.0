@@ -1,6 +1,6 @@
-{% extends "dashboard.html" %}
+{% extends "sneat/dashboard.html" %}
 
-{% block page_content %}
+{% block content %}
 
 
 <div class="case-table-container-wrapper">
@@ -61,7 +61,8 @@
         </div>
     </div>
 </div>
-
+{% endblock %}
+{% block extra_js %}
 <script>
 (function() {
     'use strict';
@@ -253,4 +254,4 @@
     };
 })();
 </script>
-{% endblock page_content %}
+{% endblock %}

@@ -46,10 +46,11 @@ def index():
         x = request.args.to_dict()
 
         if x.get('userid') is None:
-            logger.debug("""Chatbot Web Page""")
-            return render_template('viewone/chatbot/index.html')
+            logger.debug("""Chatbot Create""")
+            return render_template('sneat/chatbot/chatbot_content.html')
 
-        x = dashboard.indexweb(x)
+        # Remove dashboard dependency - just use empty data for now
+        # x = dashboard.indexweb(x)
         
         if x.get('item') is not None:
             logger.debug("""Chatbot Template""")
@@ -60,7 +61,7 @@ def index():
         data['error'] = "Error Index-Template Chatbot {}".format(e)
         logger.critical(data['error'])
 
-    return render_template('viewone/errors/404.html')
+    return render_template('sneat/chatbot/chatbot_content.html')
 
 
 @bp.route("/data/<filename>", methods=['POST'])
@@ -95,7 +96,7 @@ def data(filename):
 
 @bp.route("/action/<filename>", methods=['POST'])
 def action(filename):
-    logger.debug("""Chatbot Action: """ + filepath)
+    logger.debug("""Chatbot Action: """ + filename)
 
     try:
 
@@ -120,7 +121,7 @@ def action(filename):
 
 @bp.route("/stats/<filename>", methods=['POST'])
 def stats(filename):
-    logger.debug("""Chatbot Stats: """ + filepath)
+    logger.debug("""Chatbot Stats: """ + filename)
 
     try:
 
@@ -146,7 +147,7 @@ def stats(filename):
 
 @bp.route("/reset/<filename>", methods=['POST'])
 def resets(filename):
-    logger.debug("""Chatbot Reset: """ + filepath)
+    logger.debug("""Chatbot Reset: """ + filename)
 
     try:
 

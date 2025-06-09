@@ -1,0 +1,913 @@
+{% extends "sneat/dashboard.html" %}
+
+{% block content %}
+    <div class="header">
+        <div class="header-left">
+            <h1>Documentation Center</h1>
+            <div class="header-subtitle">Comprehensive guides, API references, and troubleshooting resources</div>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-primary" onclick="openSearchModal()">
+                <i class="fas fa-search"></i> Search Documentation
+            </button>
+            <button class="btn btn-outline-primary" onclick="exportDocumentation()">
+                <i class="fas fa-download"></i> Export
+            </button>
+        </div>
+    </div>
+
+    <!-- Search and Quick Actions -->
+    <div class="quick-actions">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="docSearch" placeholder="Search documentation, guides, APIs...">
+            <button class="search-btn" onclick="performSearch()">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+        <div class="filter-group">
+            <select id="categoryFilter" class="filter-select">
+                <option value="">All Categories</option>
+                <option value="system">System Documentation</option>
+                <option value="user">User Guides</option>
+                <option value="api">API Reference</option>
+                <option value="reports">Reports & Analytics</option>
+                <option value="troubleshooting">Troubleshooting</option>
+            </select>
+            <select id="typeFilter" class="filter-select">
+                <option value="">All Types</option>
+                <option value="guide">Guides</option>
+                <option value="api">API Docs</option>
+                <option value="tutorial">Tutorials</option>
+                <option value="reference">References</option>
+            </select>
+            <select id="statusFilter" class="filter-select">
+                <option value="">All Status</option>
+                <option value="new">New</option>
+                <option value="updated">Recently Updated</option>
+                <option value="popular">Popular</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <div class="stat-label">Total Documents</div>
+            <div class="stat-value" id="totalDocs">156</div>
+            <div class="stat-change stat-positive">↗ +12.5%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Last Updated:</span>
+                <span class="stat-footer-value">2 hours ago</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-label">Active Contributors</div>
+            <div class="stat-value" id="contributors">18</div>
+            <div class="stat-change stat-positive">↗ +3</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">This Month:</span>
+                <span class="stat-footer-value">+5 new</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">👁️</div>
+            <div class="stat-label">Total Views</div>
+            <div class="stat-value" id="totalViews">2,847</div>
+            <div class="stat-change stat-positive">↗ +8.3%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Today:</span>
+                <span class="stat-footer-value">156 views</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-label">Average Rating</div>
+            <div class="stat-value" id="avgRating">4.8</div>
+            <div class="stat-change stat-positive">↗ +0.2</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Reviews:</span>
+                <span class="stat-footer-value">342</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- Documentation Categories -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>Documentation Categories</h3>
+                <div class="card-actions">
+                    <button class="btn btn-link" onclick="refreshCategories()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="category-grid">
+                    <div class="category-item" onclick="filterByCategory('system')">
+                        <div class="category-icon">⚙️</div>
+                        <div class="category-info">
+                            <div class="category-title">System Documentation</div>
+                            <div class="category-count">24 documents</div>
+                            <div class="category-description">API guides, setup instructions, configuration</div>
+                        </div>
+                        <div class="category-badge new">New</div>
+                    </div>
+                    <div class="category-item" onclick="filterByCategory('user')">
+                        <div class="category-icon">👩‍💼</div>
+                        <div class="category-info">
+                            <div class="category-title">User Guides</div>
+                            <div class="category-count">18 documents</div>
+                            <div class="category-description">Role-based guides for all user types</div>
+                        </div>
+                        <div class="category-badge updated">Updated</div>
+                    </div>
+                    <div class="category-item" onclick="filterByCategory('api')">
+                        <div class="category-icon">🔌</div>
+                        <div class="category-info">
+                            <div class="category-title">API Reference</div>
+                            <div class="category-count">32 documents</div>
+                            <div class="category-description">Complete API documentation and examples</div>
+                        </div>
+                        <div class="category-badge popular">Popular</div>
+                    </div>
+                    <div class="category-item" onclick="filterByCategory('reports')">
+                        <div class="category-icon">📊</div>
+                        <div class="category-info">
+                            <div class="category-title">Reports & Analytics</div>
+                            <div class="category-count">15 documents</div>
+                            <div class="category-description">Reporting guides and analytics documentation</div>
+                        </div>
+                        <div class="category-badge updated">Updated</div>
+                    </div>
+                    <div class="category-item" onclick="filterByCategory('troubleshooting')">
+                        <div class="category-icon">🔧</div>
+                        <div class="category-info">
+                            <div class="category-title">Troubleshooting</div>
+                            <div class="category-count">28 documents</div>
+                            <div class="category-description">Common issues and solutions</div>
+                        </div>
+                        <div class="category-badge popular">Popular</div>
+                    </div>
+                    <div class="category-item" onclick="filterByCategory('tutorials')">
+                        <div class="category-icon">🎓</div>
+                        <div class="category-info">
+                            <div class="category-title">Tutorials</div>
+                            <div class="category-count">12 documents</div>
+                            <div class="category-description">Step-by-step learning guides</div>
+                        </div>
+                        <div class="category-badge new">New</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Documents -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>Recently Updated</h3>
+                <div class="card-actions">
+                    <button class="btn btn-link" onclick="refreshRecentDocs()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="recent-docs-list">
+                    <div class="doc-item">
+                        <div class="doc-icon">📋</div>
+                        <div class="doc-content">
+                            <div class="doc-title">Getting Started with Call Management</div>
+                            <div class="doc-meta">
+                                <span class="doc-category">User Guide</span>
+                                <span class="doc-updated">Updated 2 hours ago</span>
+                            </div>
+                            <div class="doc-description">Complete guide for new counselors on managing calls effectively</div>
+                        </div>
+                        <div class="doc-actions">
+                            <button class="action-btn" onclick="viewDocument('call-management-guide')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn" onclick="bookmarkDocument('call-management-guide')">
+                                <i class="fas fa-bookmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="doc-item">
+                        <div class="doc-icon">🔌</div>
+                        <div class="doc-content">
+                            <div class="doc-title">API Authentication Guide</div>
+                            <div class="doc-meta">
+                                <span class="doc-category">API Reference</span>
+                                <span class="doc-updated">Updated 4 hours ago</span>
+                            </div>
+                            <div class="doc-description">Comprehensive guide on API authentication methods and best practices</div>
+                        </div>
+                        <div class="doc-actions">
+                            <button class="action-btn" onclick="viewDocument('api-auth-guide')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn" onclick="bookmarkDocument('api-auth-guide')">
+                                <i class="fas fa-bookmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="doc-item">
+                        <div class="doc-icon">📊</div>
+                        <div class="doc-content">
+                            <div class="doc-title">Advanced Analytics Dashboard</div>
+                            <div class="doc-meta">
+                                <span class="doc-category">Reports & Analytics</span>
+                                <span class="doc-updated">Updated 6 hours ago</span>
+                            </div>
+                            <div class="doc-description">Guide to using advanced analytics features and custom reports</div>
+                        </div>
+                        <div class="doc-actions">
+                            <button class="action-btn" onclick="viewDocument('analytics-dashboard')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn" onclick="bookmarkDocument('analytics-dashboard')">
+                                <i class="fas fa-bookmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="doc-item">
+                        <div class="doc-icon">🔧</div>
+                        <div class="doc-content">
+                            <div class="doc-title">Troubleshooting Common Issues</div>
+                            <div class="doc-meta">
+                                <span class="doc-category">Troubleshooting</span>
+                                <span class="doc-updated">Updated 1 day ago</span>
+                            </div>
+                            <div class="doc-description">Solutions for common system issues and error messages</div>
+                        </div>
+                        <div class="doc-actions">
+                            <button class="action-btn" onclick="viewDocument('troubleshooting-guide')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn" onclick="bookmarkDocument('troubleshooting-guide')">
+                                <i class="fas fa-bookmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Popular Documents -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>Most Popular</h3>
+                <div class="card-actions">
+                    <button class="btn btn-link" onclick="refreshPopularDocs()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="popular-docs-list">
+                    <div class="popular-doc-item">
+                        <div class="popular-doc-rank">1</div>
+                        <div class="popular-doc-content">
+                            <div class="popular-doc-title">Quick Start Guide</div>
+                            <div class="popular-doc-stats">
+                                <span class="views">1,247 views</span>
+                                <span class="rating">⭐ 4.9</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewDocument('quick-start')">View</button>
+                    </div>
+                    <div class="popular-doc-item">
+                        <div class="popular-doc-rank">2</div>
+                        <div class="popular-doc-content">
+                            <div class="popular-doc-title">API Integration Tutorial</div>
+                            <div class="popular-doc-stats">
+                                <span class="views">892 views</span>
+                                <span class="rating">⭐ 4.8</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewDocument('api-integration')">View</button>
+                    </div>
+                    <div class="popular-doc-item">
+                        <div class="popular-doc-rank">3</div>
+                        <div class="popular-doc-content">
+                            <div class="popular-doc-title">User Management Guide</div>
+                            <div class="popular-doc-stats">
+                                <span class="views">756 views</span>
+                                <span class="rating">⭐ 4.7</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewDocument('user-management')">View</button>
+                    </div>
+                    <div class="popular-doc-item">
+                        <div class="popular-doc-rank">4</div>
+                        <div class="popular-doc-content">
+                            <div class="popular-doc-title">Reporting Best Practices</div>
+                            <div class="popular-doc-stats">
+                                <span class="views">634 views</span>
+                                <span class="rating">⭐ 4.6</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewDocument('reporting-best-practices')">View</button>
+                    </div>
+                    <div class="popular-doc-item">
+                        <div class="popular-doc-rank">5</div>
+                        <div class="popular-doc-content">
+                            <div class="popular-doc-title">System Configuration</div>
+                            <div class="popular-doc-stats">
+                                <span class="views">521 views</span>
+                                <span class="rating">⭐ 4.5</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewDocument('system-config')">View</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documentation Analytics -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>Documentation Analytics</h3>
+                <div class="card-actions">
+                    <button class="btn btn-link" onclick="refreshAnalytics()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="docAnalyticsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documentation Table -->
+    <div class="table-section">
+        <div class="table-header">
+            <h3>All Documentation</h3>
+            <div class="table-actions">
+                <button class="btn btn-link" onclick="refreshTable()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="btn btn-link" onclick="exportTable()">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="data-table" id="docTable">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Type</th>
+                        <th>Last Updated</th>
+                        <th>Views</th>
+                        <th>Rating</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Getting Started Guide</td>
+                        <td><span class="category-badge user">User Guide</span></td>
+                        <td>Guide</td>
+                        <td>2 hours ago</td>
+                        <td>1,247</td>
+                        <td>⭐ 4.9</td>
+                        <td><span class="status-badge updated">Updated</span></td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="action-btn" onclick="viewDocument('getting-started')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn" onclick="editDocument('getting-started')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn" onclick="bookmarkDocument('getting-started')">
+                                    <i class="fas fa-bookmark"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>API Authentication</td>
+                        <td><span class="category-badge api">API Reference</span></td>
+                        <td>Reference</td>
+                        <td>4 hours ago</td>
+                        <td>892</td>
+                        <td>⭐ 4.8</td>
+                        <td><span class="status-badge updated">Updated</span></td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="action-btn" onclick="viewDocument('api-auth')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn" onclick="editDocument('api-auth')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn" onclick="bookmarkDocument('api-auth')">
+                                    <i class="fas fa-bookmark"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>System Configuration</td>
+                        <td><span class="category-badge system">System</span></td>
+                        <td>Guide</td>
+                        <td>1 day ago</td>
+                        <td>521</td>
+                        <td>⭐ 4.5</td>
+                        <td><span class="status-badge popular">Popular</span></td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="action-btn" onclick="viewDocument('system-config')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn" onclick="editDocument('system-config')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn" onclick="bookmarkDocument('system-config')">
+                                    <i class="fas fa-bookmark"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Troubleshooting Guide</td>
+                        <td><span class="category-badge troubleshooting">Troubleshooting</span></td>
+                        <td>Guide</td>
+                        <td>2 days ago</td>
+                        <td>756</td>
+                        <td>⭐ 4.7</td>
+                        <td><span class="status-badge popular">Popular</span></td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="action-btn" onclick="viewDocument('troubleshooting')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn" onclick="editDocument('troubleshooting')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn" onclick="bookmarkDocument('troubleshooting')">
+                                    <i class="fas fa-bookmark"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="table-pagination">
+            <button class="btn btn-link" onclick="previousPage()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <span id="pageInfo">Page 1 of 5</span>
+            <button class="btn btn-link" onclick="nextPage()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Initialize documentation analytics chart
+function initializeDocAnalyticsChart() {
+    const ctx = document.getElementById('docAnalyticsChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    {
+                        label: 'Document Views',
+                        data: [120, 150, 180, 200, 220, 250],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'New Documents',
+                        data: [8, 12, 15, 18, 22, 25],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
+    }
+}
+
+// Search functionality
+function performSearch() {
+    const query = document.getElementById('docSearch').value;
+    console.log('Searching for:', query);
+    // Implement search logic
+}
+
+// Filter functions
+function filterByCategory(category) {
+    console.log('Filtering by category:', category);
+    // Implement category filtering
+}
+
+// Document actions
+function viewDocument(docId) {
+    console.log('Viewing document:', docId);
+    // Implement document viewing
+}
+
+function editDocument(docId) {
+    console.log('Editing document:', docId);
+    // Implement document editing
+}
+
+function bookmarkDocument(docId) {
+    console.log('Bookmarking document:', docId);
+    // Implement bookmarking
+}
+
+// Refresh functions
+function refreshCategories() {
+    console.log('Refreshing categories...');
+}
+
+function refreshRecentDocs() {
+    console.log('Refreshing recent documents...');
+}
+
+function refreshPopularDocs() {
+    console.log('Refreshing popular documents...');
+}
+
+function refreshAnalytics() {
+    console.log('Refreshing analytics...');
+}
+
+function refreshTable() {
+    console.log('Refreshing table...');
+}
+
+// Export functions
+function exportDocumentation() {
+    console.log('Exporting documentation...');
+}
+
+function exportTable() {
+    console.log('Exporting table...');
+}
+
+// Modal functions
+function openSearchModal() {
+    console.log('Opening search modal...');
+}
+
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        initializeDocAnalyticsChart();
+    }, 100);
+});
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.category-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.category-item:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.category-icon {
+    font-size: 2rem;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.category-info {
+    flex: 1;
+}
+
+.category-title {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.category-count {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.category-description {
+    color: #94a3b8;
+    font-size: 0.75rem;
+}
+
+.category-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.category-badge.new {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.category-badge.updated {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.category-badge.popular {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.recent-docs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.doc-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+}
+
+.doc-icon {
+    font-size: 1.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.doc-content {
+    flex: 1;
+}
+
+.doc-title {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.doc-meta {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.doc-category {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.doc-updated {
+    color: #94a3b8;
+    font-size: 0.875rem;
+}
+
+.doc-description {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.doc-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.popular-docs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.popular-doc-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+}
+
+.popular-doc-rank {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #3b82f6;
+    width: 2rem;
+    text-align: center;
+}
+
+.popular-doc-content {
+    flex: 1;
+}
+
+.popular-doc-title {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.popular-doc-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.875rem;
+}
+
+.views {
+    color: #64748b;
+}
+
+.rating {
+    color: #f59e0b;
+}
+
+.category-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.category-badge.user {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.category-badge.api {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.category-badge.system {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.category-badge.troubleshooting {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-badge.updated {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-badge.popular {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-badge.new {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+    max-width: 500px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.search-box i {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+}
+
+.search-btn {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+.search-btn:hover {
+    background: #2563eb;
+}
+</style>
+{% endblock %}

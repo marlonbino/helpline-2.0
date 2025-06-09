@@ -1,0 +1,607 @@
+{% extends "sneat/dashboard.html" %}
+
+{% block content %}
+    <div class="header">
+        <div class="header-left">
+            <h1>AI Services Dashboard</h1>
+            <div class="header-subtitle">Monitor and manage AI-powered services in real-time</div>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-primary" onclick="openServiceConfig()">
+                <i class="fas fa-cog"></i> Configure Services
+            </button>
+            <button class="btn btn-outline-primary" onclick="exportAIData()">
+                <i class="fas fa-download"></i> Export Data
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Actions Bar -->
+    <div class="quick-actions">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="serviceSearch" placeholder="Search services...">
+        </div>
+        <div class="filter-group">
+            <select id="serviceTypeFilter" class="filter-select">
+                <option value="">All Services</option>
+                <option value="transcription">Transcription</option>
+                <option value="translation">Translation</option>
+                <option value="classification">Classification</option>
+                <option value="analytics">Analytics</option>
+            </select>
+            <select id="statusFilter" class="filter-select">
+                <option value="">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="idle">Idle</option>
+                <option value="error">Error</option>
+                <option value="maintenance">Maintenance</option>
+            </select>
+            <select id="timeFilter" class="filter-select">
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="quarter">This Quarter</option>
+                <option value="year">This Year</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">🎤</div>
+            <div class="stat-label">Total Transcriptions</div>
+            <div class="stat-value" id="totalTranscriptions">0</div>
+            <div class="stat-change stat-positive">↗ +12.3%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Success Rate:</span>
+                <span class="stat-footer-value" id="transcriptionSuccessRate">0%</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🌐</div>
+            <div class="stat-label">Translation Volume</div>
+            <div class="stat-value" id="translationVolume">0</div>
+            <div class="stat-change stat-positive">↗ +8.2%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Languages:</span>
+                <span class="stat-footer-value" id="supportedLanguages">0</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🏷️</div>
+            <div class="stat-label">Classification Accuracy</div>
+            <div class="stat-value" id="classificationAccuracy">0%</div>
+            <div class="stat-change stat-positive">↗ +2.1%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Categories:</span>
+                <span class="stat-footer-value" id="totalCategories">0</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-label">Average Response Time</div>
+            <div class="stat-value" id="avgResponseTime">0s</div>
+            <div class="stat-change stat-positive">↓ -15%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Peak Load:</span>
+                <span class="stat-footer-value" id="peakLoad">0%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- Service Performance -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>Service Performance</h3>
+                <div class="card-actions">
+                    <button class="btn btn-link" onclick="refreshPerformanceChart()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="btn btn-link" onclick="togglePerformanceView()">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Service Distribution -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>Service Distribution</h3>
+                <div class="card-actions">
+                    <button class="btn btn-link" onclick="refreshDistributionChart()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="distributionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Service Health -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>Service Health</h3>
+                <div class="card-actions">
+                    <button class="btn btn-link" onclick="refreshHealthStatus()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="health-status">
+                    <div class="health-item">
+                        <div class="health-icon transcription">🎤</div>
+                        <div class="health-info">
+                            <div class="health-title">Transcription Service</div>
+                            <div class="health-metrics">
+                                <span class="health-status-badge active">Active</span>
+                                <span class="health-uptime">99.9% Uptime</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="health-item">
+                        <div class="health-icon translation">🌐</div>
+                        <div class="health-info">
+                            <div class="health-title">Translation Service</div>
+                            <div class="health-metrics">
+                                <span class="health-status-badge active">Active</span>
+                                <span class="health-uptime">99.8% Uptime</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="health-item">
+                        <div class="health-icon classification">🏷️</div>
+                        <div class="health-info">
+                            <div class="health-title">Classification Service</div>
+                            <div class="health-metrics">
+                                <span class="health-status-badge active">Active</span>
+                                <span class="health-uptime">99.7% Uptime</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="health-item">
+                        <div class="health-icon analytics">📊</div>
+                        <div class="health-info">
+                            <div class="health-title">Analytics Service</div>
+                            <div class="health-metrics">
+                                <span class="health-status-badge active">Active</span>
+                                <span class="health-uptime">99.6% Uptime</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>Recent Activity</h3>
+                <div class="card-actions">
+                    <button class="btn btn-link" onclick="refreshActivity()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="activity-list" id="activityList">
+                    <!-- Activity items will be populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service Table -->
+    <div class="table-section">
+        <div class="table-header">
+            <h3>Service Details</h3>
+            <div class="table-actions">
+                <button class="btn btn-link" onclick="refreshTable()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="btn btn-link" onclick="toggleColumns()">
+                    <i class="fas fa-columns"></i> Columns
+                </button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="data-table" id="serviceTable">
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>Status</th>
+                        <th>Requests</th>
+                        <th>Success Rate</th>
+                        <th>Response Time</th>
+                        <th>Last Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table data will be populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+        <div class="table-pagination">
+            <button class="btn btn-link" onclick="previousPage()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <span id="pageInfo">Page 1 of 1</span>
+            <button class="btn btn-link" onclick="nextPage()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Initialize charts with sample data
+function initializeCharts() {
+    // Performance Chart
+    const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+    window.performanceChart = new Chart(performanceCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [
+                {
+                    label: 'Transcription',
+                    data: [120, 150, 180, 200, 220, 250],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Translation',
+                    data: [80, 100, 120, 140, 160, 180],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Classification',
+                    data: [60, 75, 90, 105, 120, 135],
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
+
+    // Distribution Chart
+    const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+    window.distributionChart = new Chart(distributionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Transcription', 'Translation', 'Classification', 'Analytics'],
+            datasets: [{
+                data: [40, 25, 20, 15],
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(99, 102, 241, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(16, 185, 129, 1)',
+                    'rgba(245, 158, 11, 1)',
+                    'rgba(99, 102, 241, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            cutout: '60%'
+        }
+    });
+}
+
+// Load service data with sample data
+function loadServiceData() {
+    // Update metrics with sample data
+    document.getElementById('totalTranscriptions').textContent = '1,234';
+    document.getElementById('transcriptionSuccessRate').textContent = '98.5%';
+    document.getElementById('translationVolume').textContent = '856';
+    document.getElementById('supportedLanguages').textContent = '12';
+    document.getElementById('classificationAccuracy').textContent = '95.2%';
+    document.getElementById('totalCategories').textContent = '24';
+    document.getElementById('avgResponseTime').textContent = '0.8s';
+    document.getElementById('peakLoad').textContent = '75%';
+
+    // Update activity list with sample data
+    const activityList = document.getElementById('activityList');
+    const activities = [
+        { service: 'Transcription', action: 'Completed batch processing', time: '2 minutes ago' },
+        { service: 'Translation', action: 'Updated language models', time: '15 minutes ago' },
+        { service: 'Classification', action: 'Improved accuracy by 2.1%', time: '1 hour ago' },
+        { service: 'Analytics', action: 'Generated monthly report', time: '2 hours ago' }
+    ];
+
+    activityList.innerHTML = activities.map(activity => `
+        <div class="activity-item">
+            <div class="activity-icon">${getServiceIcon(activity.service)}</div>
+            <div class="activity-content">
+                <div class="activity-title">${activity.service}</div>
+                <div class="activity-description">${activity.action}</div>
+                <div class="activity-time">${activity.time}</div>
+            </div>
+        </div>
+    `).join('');
+
+    // Update service table with sample data
+    const serviceTable = document.getElementById('serviceTable').getElementsByTagName('tbody')[0];
+    const services = [
+        { name: 'Transcription Service', status: 'active', requests: '1,234', success: '98.5%', response: '0.5s', updated: '2 min ago' },
+        { name: 'Translation Service', status: 'active', requests: '856', success: '97.8%', response: '0.8s', updated: '5 min ago' },
+        { name: 'Classification Service', status: 'active', requests: '2,345', success: '95.2%', response: '0.3s', updated: '1 min ago' },
+        { name: 'Analytics Service', status: 'active', requests: '567', success: '99.1%', response: '1.2s', updated: '10 min ago' }
+    ];
+
+    serviceTable.innerHTML = services.map(service => `
+        <tr>
+            <td>${service.name}</td>
+            <td><span class="status-badge ${service.status}">${service.status}</span></td>
+            <td>${service.requests}</td>
+            <td>${service.success}</td>
+            <td>${service.response}</td>
+            <td>${service.updated}</td>
+            <td>
+                <div class="table-actions">
+                    <button class="action-btn" onclick="viewServiceDetails('${service.name}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-btn" onclick="editService('${service.name}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Utility function to get service icon
+function getServiceIcon(service) {
+    const icons = {
+        'Transcription': '🎤',
+        'Translation': '🌐',
+        'Classification': '🏷️',
+        'Analytics': '📊'
+    };
+    return icons[service] || '🤖';
+}
+
+// Setup event listeners
+function setupEventListeners() {
+    // Search functionality
+    const searchInput = document.getElementById('serviceSearch');
+    searchInput.addEventListener('input', debounce((e) => {
+        filterServices(e.target.value);
+    }, 300));
+
+    // Filter functionality
+    document.getElementById('serviceTypeFilter').addEventListener('change', filterServices);
+    document.getElementById('statusFilter').addEventListener('change', filterServices);
+    document.getElementById('timeFilter').addEventListener('change', updateTimeRange);
+}
+
+// Start real-time updates
+function startRealTimeUpdates() {
+    // Update dashboard every 30 seconds
+    setInterval(updateDashboard, 30000);
+}
+
+// Utility functions
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+function filterServices(query = '') {
+    // Implement service filtering logic
+    console.log('Filtering services with query:', query);
+}
+
+function updateTimeRange() {
+    // Implement time range update logic
+    console.log('Updating time range...');
+}
+
+function refreshPerformanceChart() {
+    // Implement performance chart refresh logic
+    console.log('Refreshing performance chart...');
+}
+
+function refreshDistributionChart() {
+    // Implement distribution chart refresh logic
+    console.log('Refreshing distribution chart...');
+}
+
+function refreshHealthStatus() {
+    // Implement health status refresh logic
+    console.log('Refreshing health status...');
+}
+
+function refreshActivity() {
+    // Implement activity refresh logic
+    console.log('Refreshing activity...');
+}
+
+function refreshTable() {
+    // Implement table refresh logic
+    console.log('Refreshing table...');
+}
+
+function toggleColumns() {
+    // Implement column visibility toggle logic
+    console.log('Toggling columns...');
+}
+
+function openServiceConfig() {
+    // Implement service configuration opening logic
+    console.log('Opening service configuration...');
+}
+
+function exportAIData() {
+    // Implement AI data export logic
+    console.log('Exporting AI data...');
+}
+
+function updateDashboard() {
+    // Implement dashboard update logic
+    console.log('Updating dashboard...');
+}
+
+// Initialize dashboard with a slight delay to ensure DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        initializeCharts();
+        loadServiceData();
+        setupEventListeners();
+        startRealTimeUpdates();
+    }, 100);
+});
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+}
+
+.activity-icon {
+    font-size: 1.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-title {
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.activity-description {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.activity-time {
+    color: #94a3b8;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+</style>
+{% endblock %}

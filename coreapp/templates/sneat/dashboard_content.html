@@ -1,0 +1,1057 @@
+{% extends "sneat/dashboard.html" %}
+
+{% block extra_head %}
+<!-- Chart.js and additional libraries -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+/* Modern Dashboard Styles */
+.dashboard-container {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
+}
+
+/* Header Section */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.header-left h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.header-subtitle {
+    color: #64748b;
+    font-size: 1rem;
+    margin-top: 0.25rem;
+}
+
+.header-right {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Quick Actions Bar */
+.quick-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem 1.5rem;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+}
+
+.search-box i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filter-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.filter-select {
+    padding: 0.75rem 2rem 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    background: white;
+    color: #1e293b;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Enhanced Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-radius: 0.75rem;
+    color: #3b82f6;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.stat-change {
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.stat-positive { color: #10b981; }
+.stat-negative { color: #ef4444; }
+.stat-neutral { color: #64748b; }
+
+.stat-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+    font-size: 0.75rem;
+}
+
+.stat-footer-label {
+    color: #64748b;
+}
+
+.stat-footer-value {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.chart-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.chart-card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.chart-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.chart-card.full-width {
+    grid-column: 1 / -1;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.chart-header h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.chart-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.chart-actions .btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.chart-actions .btn:hover,
+.chart-actions .btn.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    padding: 1rem 1.5rem 1.5rem;
+}
+
+/* Activity Section */
+.activity-section {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.activity-header h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.activity-list {
+    padding: 1rem 1.5rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    transition: all 0.2s;
+}
+
+.activity-item:hover {
+    background: #f1f5f9;
+    transform: translateX(4px);
+}
+
+.activity-item:last-child {
+    margin-bottom: 0;
+}
+
+.activity-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+}
+
+.activity-icon.call { color: #ef4444; }
+.activity-icon.case { color: #10b981; }
+.activity-icon.staff { color: #3b82f6; }
+.activity-icon.system { color: #8b5cf6; }
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-title {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.activity-description {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.activity-time {
+    color: #94a3b8;
+    font-size: 0.75rem;
+}
+
+/* Quick Stats Row */
+.quick-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.quick-stat {
+    background: white;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+.quick-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.quick-stat-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-1px);
+}
+
+.btn-outline-primary {
+    background: white;
+    color: #3b82f6;
+    border: 1px solid #3b82f6;
+}
+
+.btn-outline-primary:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+.btn-link {
+    background: none;
+    color: #3b82f6;
+    padding: 0.5rem;
+}
+
+.btn-link:hover {
+    background: #f0f9ff;
+    border-radius: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 1rem;
+    }
+    
+    .dashboard-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .quick-actions {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .search-box {
+        max-width: none;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Chart Container Fixes */
+.chart-container canvas {
+    max-height: 100% !important;
+    width: 100% !important;
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Header Section -->
+    <div class="dashboard-header">
+        <div class="header-left">
+            <h1>Main Dashboard</h1>
+            <div class="header-subtitle">Real-time overview of helpline operations and performance metrics</div>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-outline-primary" onclick="refreshDashboard()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+            <button class="btn btn-primary" onclick="exportDashboardData()">
+                <i class="fas fa-download"></i> Export Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Actions Bar -->
+    <div class="quick-actions">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="dashboardSearch" placeholder="Search cases, calls, or staff...">
+        </div>
+        <div class="filter-group">
+            <select id="timeFilter" class="filter-select">
+                <option value="today">Today</option>
+                <option value="week" selected>This Week</option>
+                <option value="month">This Month</option>
+                <option value="quarter">This Quarter</option>
+                <option value="year">This Year</option>
+            </select>
+            <select id="viewFilter" class="filter-select">
+                <option value="all">All Data</option>
+                <option value="calls">Calls Only</option>
+                <option value="cases">Cases Only</option>
+                <option value="staff">Staff Only</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Quick Stats Row -->
+    <div class="quick-stats">
+        <div class="quick-stat">
+            <div class="quick-stat-value" id="totalSessions">1,247</div>
+            <div class="quick-stat-label">Total Sessions</div>
+        </div>
+        <div class="quick-stat">
+            <div class="quick-stat-value" id="avgSessionTime">12.5m</div>
+            <div class="quick-stat-label">Avg Session Time</div>
+        </div>
+        <div class="quick-stat">
+            <div class="quick-stat-value" id="satisfactionRate">94.2%</div>
+            <div class="quick-stat-label">Satisfaction Rate</div>
+        </div>
+        <div class="quick-stat">
+            <div class="quick-stat-value" id="peakHours">2-4 PM</div>
+            <div class="quick-stat-label">Peak Hours</div>
+        </div>
+    </div>
+
+    <!-- Enhanced Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📞</div>
+            <div class="stat-label">Total Calls Today</div>
+            <div class="stat-value" id="totalCalls">387</div>
+            <div class="stat-change stat-positive">↗ +18.2%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Active Calls:</span>
+                <span class="stat-footer-value" id="activeCalls">12</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📁</div>
+            <div class="stat-label">Active Cases</div>
+            <div class="stat-value" id="activeCases">156</div>
+            <div class="stat-change stat-positive">↗ +8.5%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Urgent:</span>
+                <span class="stat-footer-value" id="urgentCases">23</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-label">Active Staff</div>
+            <div class="stat-value" id="activeStaff">28</div>
+            <div class="stat-change stat-neutral">→ No Change</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Available:</span>
+                <span class="stat-footer-value" id="availableStaff">24</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-label">Avg Response Time</div>
+            <div class="stat-value" id="avgResponseTime">1.2m</div>
+            <div class="stat-change stat-positive">↓ -15%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Target:</span>
+                <span class="stat-footer-value">2.0m</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Content -->
+    <div class="dashboard-grid">
+        <!-- Charts Section -->
+        <div class="chart-section">
+            <!-- Call Volume & Case Trends -->
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <h3>Call Volume & Case Trends</h3>
+                    <div class="chart-actions">
+                        <button class="btn btn-sm active" data-view="daily">Daily</button>
+                        <button class="btn btn-sm" data-view="weekly">Weekly</button>
+                        <button class="btn btn-sm" data-view="monthly">Monthly</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="trendsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Case Distribution -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Case Distribution</h3>
+                    <div class="chart-actions">
+                        <select class="filter-select" id="distributionType">
+                            <option value="category">By Category</option>
+                            <option value="priority">By Priority</option>
+                            <option value="status">By Status</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="distributionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Staff Performance -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Staff Performance</h3>
+                    <div class="chart-actions">
+                        <select class="filter-select" id="performanceMetric">
+                            <option value="cases">Cases Handled</option>
+                            <option value="resolution">Resolution Rate</option>
+                            <option value="satisfaction">Satisfaction</option>
+                            <option value="response">Response Time</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Section -->
+        <div class="activity-section">
+            <div class="activity-header">
+                <h3>Recent Activity</h3>
+                <button class="btn btn-link" onclick="refreshActivity()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+            <div class="activity-list" id="recentActivity">
+                <!-- Activity items will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Initialize dashboard when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing enhanced dashboard...');
+    initializeCharts();
+    loadDashboardData();
+    setupEventListeners();
+    startRealTimeUpdates();
+});
+
+function initializeCharts() {
+    console.log('Creating enhanced charts...');
+    
+    // Trends Chart
+    const trendsCtx = document.getElementById('trendsChart').getContext('2d');
+    const trendsData = [85, 92, 78, 95, 110, 88, 76];
+    const casesData = [45, 52, 38, 55, 60, 48, 36];
+    
+    new Chart(trendsCtx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Calls',
+                data: trendsData,
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 3,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+                pointBackgroundColor: '#3b82f6'
+            }, {
+                label: 'Cases',
+                data: casesData,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 3,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+                pointBackgroundColor: '#10b981'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: '#3b82f6',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        font: {
+                            size: 11
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 11
+                        }
+                    }
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
+
+    // Distribution Chart
+    const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+    const distributionData = [30, 25, 20, 15, 10];
+    
+    new Chart(distributionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Child Protection', 'GBV', 'Mental Health', 'Family', 'Other'],
+            datasets: [{
+                data: distributionData,
+                backgroundColor: [
+                    '#ef4444',
+                    '#f59e0b',
+                    '#10b981',
+                    '#3b82f6',
+                    '#8b5cf6'
+                ],
+                borderColor: [
+                    '#dc2626',
+                    '#d97706',
+                    '#059669',
+                    '#2563eb',
+                    '#7c3aed'
+                ],
+                borderWidth: 2,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15,
+                        font: {
+                            size: 11
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            cutout: '60%'
+        }
+    });
+
+    // Performance Chart
+    const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+    const performanceData = [45, 38, 42, 35, 40];
+    
+    new Chart(performanceCtx, {
+        type: 'bar',
+        data: {
+            labels: ['John D.', 'Sarah M.', 'Mike R.', 'Lisa K.', 'Tom B.'],
+            datasets: [{
+                label: 'Cases Handled',
+                data: performanceData,
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(139, 92, 246, 0.8)'
+                ],
+                borderColor: [
+                    '#3b82f6',
+                    '#10b981',
+                    '#f59e0b',
+                    '#ef4444',
+                    '#8b5cf6'
+                ],
+                borderWidth: 2,
+                borderRadius: 6,
+                maxBarThickness: 35
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    callbacks: {
+                        label: function(context) {
+                            return `Cases Handled: ${context.raw}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        font: {
+                            size: 11
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    console.log('All enhanced charts initialized successfully!');
+}
+
+function loadDashboardData() {
+    // Update activity list with enhanced sample data
+    const activityList = document.getElementById('recentActivity');
+    if (activityList) {
+        const activities = [
+            { type: 'call', title: 'New Emergency Call', description: 'Child Protection case reported from Zone 3', time: '2 minutes ago' },
+            { type: 'case', title: 'Case Resolved', description: 'GBV case #1234 marked as resolved by Sarah M.', time: '15 minutes ago' },
+            { type: 'staff', title: 'Staff Update', description: 'Sarah M. completed 5 cases today (95% satisfaction)', time: '1 hour ago' },
+            { type: 'system', title: 'System Update', description: 'Daily backup completed successfully', time: '2 hours ago' },
+            { type: 'call', title: 'High Priority Call', description: 'Mental health crisis reported', time: '3 hours ago' },
+            { type: 'case', title: 'Case Assigned', description: 'New case #1235 assigned to Mike R.', time: '4 hours ago' }
+        ];
+
+        activityList.innerHTML = activities.map(activity => `
+            <div class="activity-item">
+                <div class="activity-icon ${activity.type}">${getActivityIcon(activity.type)}</div>
+                <div class="activity-content">
+                    <div class="activity-title">${activity.title}</div>
+                    <div class="activity-description">${activity.description}</div>
+                    <div class="activity-time">${activity.time}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+// Utility function to get activity icon
+function getActivityIcon(type) {
+    const icons = {
+        'call': '📞',
+        'case': '📁',
+        'staff': '👥',
+        'system': '⚙️'
+    };
+    return icons[type] || '📌';
+}
+
+function setupEventListeners() {
+    // Search input
+    const searchInput = document.getElementById('dashboardSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(function(e) {
+            filterDashboard();
+        }, 300));
+    }
+
+    // Filter selects
+    const timeFilter = document.getElementById('timeFilter');
+    if (timeFilter) {
+        timeFilter.addEventListener('change', filterDashboard);
+    }
+    
+    const distributionType = document.getElementById('distributionType');
+    if (distributionType) {
+        distributionType.addEventListener('change', updateDistributionChart);
+    }
+    
+    const performanceMetric = document.getElementById('performanceMetric');
+    if (performanceMetric) {
+        performanceMetric.addEventListener('change', updatePerformanceChart);
+    }
+
+    // Chart view buttons
+    document.querySelectorAll('.chart-actions .btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.chart-actions .btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            updateTrendsChart(this.dataset.view);
+        });
+    });
+}
+
+function startRealTimeUpdates() {
+    // Implement real-time updates using WebSocket or polling
+    setInterval(updateDashboard, 30000); // Update every 30 seconds
+}
+
+// Utility functions
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+function filterDashboard() {
+    console.log('Filtering dashboard...');
+    // Add filtering logic here
+}
+
+function updateDistributionChart() {
+    console.log('Updating distribution chart...');
+    // Add chart update logic here
+}
+
+function updatePerformanceChart() {
+    console.log('Updating performance chart...');
+    // Add chart update logic here
+}
+
+function updateTrendsChart(view) {
+    console.log('Updating trends chart with view:', view);
+    // Add chart update logic here
+}
+
+function refreshActivity() {
+    console.log('Refreshing activity...');
+    loadDashboardData();
+}
+
+function exportDashboardData() {
+    console.log('Exporting dashboard data...');
+    // Add export logic here
+    alert('Dashboard data export feature coming soon!');
+}
+
+function refreshDashboard() {
+    console.log('Refreshing dashboard...');
+    loadDashboardData();
+    // Add refresh logic here
+}
+
+function updateDashboard() {
+    console.log('Updating dashboard...');
+    // Add update logic here
+}
+</script>
+{% endblock %}

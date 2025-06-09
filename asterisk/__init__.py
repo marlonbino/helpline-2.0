@@ -64,13 +64,14 @@ def index():
         x = request.args.to_dict()
 
         if x.get('userid') is None:
-            logger.debug("""CDR-Data Create""")
+            logger.debug("""Asterisk Create""")
             return render_template('viewone/asterisk/index.html')
 
-        x = dashboard.indexweb(x)
+        # Remove dashboard dependency - just use empty data for now
+        # x = dashboard.indexweb(x)
         
         if x.get('item') is not None:
-            logger.debug("""CDR-Data Template""")
+            logger.debug("""Asterisk Template""")
             return render_template('viewone/asterisk/' + x.get(
                 'item') + '.html', data=x.get('data'))
 
@@ -160,7 +161,7 @@ def mediadata():
 
 @bp.route("/media/<filename>", methods=['GET'])
 def mediaitem(filename):
-    logger.debug("""Asterisk Media """ + filepath)
+    logger.debug("""Asterisk Media """ + filename)
 
     try:
 

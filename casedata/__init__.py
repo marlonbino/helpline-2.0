@@ -49,7 +49,8 @@ def index():
             logger.debug("""Case-Data Create""")
             return render_template('viewone/casedata/index.html')
 
-        x = dashboard.indexweb(x)
+        # Remove dashboard dependency - just use empty data for now
+        # x = dashboard.indexweb(x)
         
         if x.get('item') is not None:
             logger.debug("""Case-Data Template""")
@@ -95,7 +96,7 @@ def data(filename):
 
 @bp.route("/action/<filename>", methods=['POST'])
 def action(filename):
-    logger.debug("""Case-Data Action: """ + filepath)
+    logger.debug("""Case-Data Action: """ + filename)
 
     try:
 
@@ -120,7 +121,7 @@ def action(filename):
 
 @bp.route("/stats/<filename>", methods=['POST'])
 def stats(filename):
-    logger.debug("""Case-Data Stats: """ + filepath)
+    logger.debug("""Case-Data Stats: """ + filename)
 
     try:
 
@@ -146,7 +147,7 @@ def stats(filename):
 
 @bp.route("/reset/<filename>", methods=['POST'])
 def resets(filename):
-    logger.debug("""Case-Data Reset: """ + filepath)
+    logger.debug("""Case-Data Reset: """ + filename)
 
     try:
 

@@ -48,7 +48,8 @@ def index():
             logger.debug("""AI-Core Create""")
             return render_template('viewone/aicore/index.html')
 
-        x = dashboard.indexweb(x)
+        # Remove dashboard dependency - just use empty data for now
+        # x = dashboard.indexweb(x)
         
         if x.get('item') is not None:
             logger.debug("""AI-Core Template""")
@@ -90,7 +91,7 @@ def data(action):
 
 @bp.route("/action/<filename>", methods=['POST'])
 def action(filename):
-    logger.debug("""AI-Core Action: """ + filepath)
+    logger.debug("""AI-Core Action: """ + filename)
 
     try:
 
@@ -115,7 +116,7 @@ def action(filename):
 
 @bp.route("/stats/<filename>", methods=['POST'])
 def stats(filename):
-    logger.debug("""AI-Core Stats: """ + filepath)
+    logger.debug("""AI-Core Stats: """ + filename)
 
     try:
 
@@ -141,7 +142,7 @@ def stats(filename):
 
 @bp.route("/reset/<filename>", methods=['POST'])
 def resets(filename):
-    logger.debug("""AI-Core Reset: """ + filepath)
+    logger.debug("""AI-Core Reset: """ + filename)
 
     try:
 

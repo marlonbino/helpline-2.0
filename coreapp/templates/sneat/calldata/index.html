@@ -1,0 +1,405 @@
+{% extends "sneat/dashboard.html" %}
+
+{% block content %}
+    <div class="header">
+        <div class="header-left">
+            <h1>Call Center Dashboard</h1>
+            <div class="header-subtitle">Monitor and analyze call center performance in real-time</div>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-primary" onclick="openNewCallForm()">
+                <i class="fas fa-plus"></i> New Call
+            </button>
+            <button class="btn btn-outline-primary" onclick="exportCallData()">
+                <i class="fas fa-download"></i> Export
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Actions Bar -->
+    <div class="quick-actions">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="callSearch" placeholder="Search calls...">
+        </div>
+        <div class="filter-group">
+            <select id="callTypeFilter" class="filter-select">
+                <option value="">All Call Types</option>
+                <option value="inbound">Inbound</option>
+                <option value="outbound">Outbound</option>
+                <option value="callback">Callback</option>
+                <option value="emergency">Emergency</option>
+            </select>
+            <select id="statusFilter" class="filter-select">
+                <option value="">All Statuses</option>
+                <option value="completed">Completed</option>
+                <option value="in-progress">In Progress</option>
+                <option value="missed">Missed</option>
+                <option value="scheduled">Scheduled</option>
+            </select>
+            <select id="timeFilter" class="filter-select">
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="quarter">This Quarter</option>
+                <option value="year">This Year</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📞</div>
+            <div class="stat-label">Total Calls Today</div>
+            <div class="stat-value" id="totalCallsToday">0</div>
+            <div class="stat-change stat-positive">↗ +12.3%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Active Now:</span>
+                <span class="stat-footer-value" id="activeCalls">0</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⏱️</div>
+            <div class="stat-label">Average Call Duration</div>
+            <div class="stat-value" id="avgCallDuration">0m</div>
+            <div class="stat-change stat-positive">↗ +2.1%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Peak Hours:</span>
+                <span class="stat-footer-value" id="peakHours">16:00 - 18:00</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-label">Active Agents</div>
+            <div class="stat-value" id="activeAgents">0</div>
+            <div class="stat-change stat-positive">↗ +5.4%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Avg Calls/Agent:</span>
+                <span class="stat-footer-value" id="callsPerAgent">0</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">First Call Resolution</div>
+            <div class="stat-value" id="firstCallResolution">0%</div>
+            <div class="stat-change stat-positive">↗ +3.2%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Satisfaction:</span>
+                <span class="stat-footer-value" id="satisfactionRate">0%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Content -->
+    <div class="dashboard-grid">
+        <!-- Call Volume Chart -->
+        <div class="chart-card full-width">
+            <div class="chart-header">
+                <h3>Call Volume Trends</h3>
+                <div class="chart-actions">
+                    <button class="btn btn-sm btn-outline-secondary active" data-view="volume">Volume</button>
+                    <button class="btn btn-sm btn-outline-secondary" data-view="duration">Duration</button>
+                    <button class="btn btn-sm btn-outline-secondary" data-view="resolution">Resolution</button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="callVolumeChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Call Distribution -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Call Distribution</h3>
+                <div class="chart-actions">
+                    <select class="filter-select" id="distributionType">
+                        <option value="category">By Category</option>
+                        <option value="type">By Type</option>
+                        <option value="status">By Status</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="callDistributionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Agent Performance -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Agent Performance</h3>
+                <div class="chart-actions">
+                    <select class="filter-select" id="performanceMetric">
+                        <option value="calls">Calls Handled</option>
+                        <option value="duration">Avg Duration</option>
+                        <option value="resolution">Resolution Rate</option>
+                        <option value="satisfaction">Satisfaction</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="agentPerformanceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Queue Status -->
+        <div class="queue-card">
+            <div class="card-header">
+                <h3>Queue Status</h3>
+                <button class="btn btn-sm btn-link" onclick="refreshQueue()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+            <div class="queue-list" id="queueStatus">
+                <!-- Queue items will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Calls Table -->
+    <div class="table-card">
+        <div class="card-header">
+            <h3>Recent Calls</h3>
+            <div class="table-actions">
+                <button class="btn btn-sm btn-outline-secondary" onclick="refreshTable()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="toggleColumns()">
+                    <i class="fas fa-columns"></i>
+                </button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table" id="callsTable">
+                <thead>
+                    <tr>
+                        <th>Call ID</th>
+                        <th>Time</th>
+                        <th>Agent</th>
+                        <th>Type</th>
+                        <th>Category</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th>Resolution</th>
+                        <th>Satisfaction</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Call rows will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+        <div class="table-footer">
+            <div class="table-info">
+                Showing <span id="tableStart">1</span> to <span id="tableEnd">10</span> of <span id="tableTotal">0</span> calls
+            </div>
+            <div class="pagination" id="tablePagination">
+                <!-- Pagination will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Initialize dashboard when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+    loadCallData();
+    setupEventListeners();
+    startRealTimeUpdates();
+});
+
+function initializeCharts() {
+    // Call Volume Chart
+    const volumeCtx = document.getElementById('callVolumeChart').getContext('2d');
+    new Chart(volumeCtx, {
+        type: 'line',
+        data: {
+            labels: ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'],
+            datasets: [{
+                label: 'Inbound Calls',
+                data: [12, 8, 15, 45, 65, 85, 75, 35],
+                borderColor: '#3b82f6',
+                tension: 0.4
+            }, {
+                label: 'Outbound Calls',
+                data: [5, 3, 8, 25, 35, 45, 30, 15],
+                borderColor: '#10b981',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Call Distribution Chart
+    const distributionCtx = document.getElementById('callDistributionChart').getContext('2d');
+    new Chart(distributionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Emergency', 'General Inquiry', 'Support', 'Follow-up', 'Other'],
+            datasets: [{
+                data: [15, 35, 25, 15, 10],
+                backgroundColor: [
+                    '#ef4444',
+                    '#f59e0b',
+                    '#10b981',
+                    '#3b82f6',
+                    '#8b5cf6'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+
+    // Agent Performance Chart
+    const performanceCtx = document.getElementById('agentPerformanceChart').getContext('2d');
+    new Chart(performanceCtx, {
+        type: 'bar',
+        data: {
+            labels: ['John D.', 'Sarah M.', 'Mike R.', 'Lisa K.', 'Tom B.'],
+            datasets: [{
+                label: 'Calls Handled',
+                data: [45, 38, 42, 35, 40],
+                backgroundColor: '#3b82f6'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function loadCallData() {
+    // Implement call data loading logic
+    console.log('Loading call data...');
+    // This would typically make an AJAX call to get the data
+}
+
+function setupEventListeners() {
+    // Search input
+    document.getElementById('callSearch').addEventListener('input', debounce(function(e) {
+        filterCalls();
+    }, 300));
+
+    // Filter selects
+    document.getElementById('callTypeFilter').addEventListener('change', filterCalls);
+    document.getElementById('statusFilter').addEventListener('change', filterCalls);
+    document.getElementById('timeFilter').addEventListener('change', filterCalls);
+    document.getElementById('distributionType').addEventListener('change', updateDistributionChart);
+    document.getElementById('performanceMetric').addEventListener('change', updatePerformanceChart);
+
+    // Chart view buttons
+    document.querySelectorAll('.chart-actions .btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.chart-actions .btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            updateVolumeChart(this.dataset.view);
+        });
+    });
+}
+
+function startRealTimeUpdates() {
+    // Implement real-time updates using WebSocket or polling
+    setInterval(updateDashboard, 30000); // Update every 30 seconds
+}
+
+// Utility functions
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+function filterCalls() {
+    // Implement call filtering logic
+    console.log('Filtering calls...');
+}
+
+function updateDistributionChart() {
+    // Implement distribution chart update logic
+    console.log('Updating distribution chart...');
+}
+
+function updatePerformanceChart() {
+    // Implement performance chart update logic
+    console.log('Updating performance chart...');
+}
+
+function updateVolumeChart(view) {
+    // Implement volume chart update logic
+    console.log('Updating volume chart with view:', view);
+}
+
+function refreshQueue() {
+    // Implement queue refresh logic
+    console.log('Refreshing queue...');
+}
+
+function refreshTable() {
+    // Implement table refresh logic
+    console.log('Refreshing table...');
+}
+
+function toggleColumns() {
+    // Implement column visibility toggle logic
+    console.log('Toggling columns...');
+}
+
+function openNewCallForm() {
+    // Implement new call form opening logic
+    console.log('Opening new call form...');
+}
+
+function exportCallData() {
+    // Implement call data export logic
+    console.log('Exporting call data...');
+}
+
+function updateDashboard() {
+    // Implement dashboard update logic
+    console.log('Updating dashboard...');
+}
+</script>
+{% endblock %}
