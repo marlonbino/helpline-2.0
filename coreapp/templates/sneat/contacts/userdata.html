@@ -1,0 +1,245 @@
+{% extends "sneat/base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sneat.css') }}">
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('contacts') }}">Contacts</a></li>
+<li class="breadcrumb-item active">User Management</li>
+{% endblock %}
+{% block content %}
+<div data-content-block="user-management">
+
+
+<div class="header">
+    <div>
+        <h1>👥 User Management</h1>
+        <p style="margin: 0; opacity: 0.9;">Manage system users and their details</p>
+    </div>
+    <button class="btn" id="addUserBtn">➕ Add New User</button>
+</div>
+
+<div class="users-section">
+    <div class="section-title">
+        👥 All Users
+    </div>
+    <div class="filter-controls">
+        <input type="text" class="search-box" placeholder="Search users..." id="userSearch">
+        <select class="filter-select" id="roleFilter">
+            <option value="">All Roles</option>
+            <option value="admin">Administrator</option>
+            <option value="supervisor">Supervisor</option>
+            <option value="counselor">Counselor</option>
+            <option value="volunteer">Volunteer</option>
+        </select>
+        <select class="filter-select" id="statusFilter">
+            <option value="">All Status</option>
+            <option value="online">Online</option>
+            <option value="offline">Offline</option>
+            <option value="busy">Busy</option>
+        </select>
+    </div>
+    <div class="user-list" id="userList">
+        <!-- Sample user data -->
+        <div class="user-item" data-user-id="1">
+            <div class="user-info">
+                <div class="user-avatar">JD</div>
+                <div class="user-details">
+                    <h4>John Doe</h4>
+                    <p><strong>Email:</strong> john.doe@helpline.org</p>
+                    <p><strong>Status:</strong> <span class="status-indicator status-online"></span> Online</p>
+                    <p><strong>Role:</strong> Administrator</p>
+                    <p><strong>Joined:</strong> Jan 15, 2023</p>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button class="btn" onclick="editUser('1')">Edit</button>
+                <button class="btn btn-danger" onclick="deleteUser('1')">Delete</button>
+            </div>
+        </div>
+        <div class="user-item" data-user-id="2">
+            <div class="user-info">
+                <div class="user-avatar">JS</div>
+                <div class="user-details">
+                    <h4>Jane Smith</h4>
+                    <p><strong>Email:</strong> jane.smith@helpline.org</p>
+                    <p><strong>Status:</strong> <span class="status-indicator status-online"></span> Online</p>
+                    <p><strong>Role:</strong> Supervisor</p>
+                    <p><strong>Joined:</strong> Feb 10, 2023</p>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button class="btn" onclick="editUser('2')">Edit</button>
+                <button class="btn btn-danger" onclick="deleteUser('2')">Delete</button>
+            </div>
+        </div>
+        <div class="user-item" data-user-id="3">
+            <div class="user-info">
+                <div class="user-avatar">MJ</div>
+                <div class="user-details">
+                    <h4>Mike Johnson</h4>
+                    <p><strong>Email:</strong> mike.johnson@helpline.org</p>
+                    <p><strong>Status:</strong> <span class="status-indicator status-busy"></span> Busy</p>
+                    <p><strong>Role:</strong> Counselor</p>
+                    <p><strong>Joined:</strong> Mar 5, 2023</p>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button class="btn" onclick="editUser('3')">Edit</button>
+                <button class="btn btn-danger" onclick="deleteUser('3')">Delete</button>
+            </div>
+        </div>
+        <div class="user-item" data-user-id="4">
+            <div class="user-info">
+                <div class="user-avatar">SB</div>
+                <div class="user-details">
+                    <h4>Sarah Brown</h4>
+                    <p><strong>Email:</strong> sarah.brown@helpline.org</p>
+                    <p><strong>Status:</strong> <span class="status-indicator status-offline"></span> Offline</p>
+                    <p><strong>Role:</strong> Volunteer</p>
+                    <p><strong>Joined:</strong> Apr 12, 2023</p>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button class="btn" onclick="editUser('4')">Edit</button>
+                <button class="btn btn-danger" onclick="deleteUser('4')">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="action-buttons">
+    <a href="{{ url_for('contacts') }}" class="btn btn-secondary">⬅️ Back to Contacts</a>
+</div>
+
+<!-- Add/Edit User Modal -->
+<div id="userModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modalTitle">Add New User</h2>
+        <form id="userForm" method="post" action="/api/users">
+            <div class="form-group">
+                <label for="userName">Full Name:</label>
+                <input type="text" id="userName" name="full_name" required>
+            </div>
+            <div class="form-group">
+                <label for="userEmail">Email:</label>
+                <input type="email" id="userEmail" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="userRole">Role:</label>
+                <select id="userRole" name="role" required>
+                    <option value="">Select Role</option>
+                    <option value="admin">Administrator</option>
+                    <option value="supervisor">Supervisor</option>
+                    <option value="counselor">Counselor</option>
+                    <option value="volunteer">Volunteer</option>
+                </select>
+            </div>
+            <div class="action-buttons">
+                <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                <button type="submit" class="btn">Save User</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</div>
+
+<script>
+// Modal functionality
+const modal = document.getElementById('userModal');
+const addUserBtn = document.getElementById('addUserBtn');
+const closeBtn = document.querySelector('.close');
+const cancelBtn = document.getElementById('cancelBtn');
+
+// Open modal
+addUserBtn.addEventListener('click', () => {
+    modal.style.display = 'block';
+    document.getElementById('modalTitle').textContent = 'Add New User';
+    document.getElementById('userForm').reset();
+});
+
+// Close modal
+closeBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+});
+
+cancelBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+});
+
+// Close modal when clicking outside
+window.addEventListener('click', (event) => {
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+});
+
+// User functions
+function editUser(userId) {
+    // In a real app, this would load user data and populate the form
+    document.getElementById('modalTitle').textContent = 'Edit User';
+    modal.style.display = 'block';
+    // Populate form with user data
+    console.log('Editing user:', userId);
+}
+
+function deleteUser(userId) {
+    if (confirm('Are you sure you want to delete this user?')) {
+        // In a real app, this would make an API call to delete the user
+        console.log('Deleting user:', userId);
+        // Remove from DOM
+        document.querySelector(`[data-user-id="${userId}"]`).remove();
+    }
+}
+
+// Search and filter functionality
+document.getElementById('userSearch').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const userItems = document.querySelectorAll('.user-item');
+    
+    userItems.forEach(item => {
+        const userName = item.querySelector('h4').textContent.toLowerCase();
+        const userEmail = item.querySelector('p').textContent.toLowerCase();
+        
+        if (userName.includes(searchTerm) || userEmail.includes(searchTerm)) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+});
+
+document.getElementById('roleFilter').addEventListener('change', function() {
+    const selectedRole = this.value.toLowerCase();
+    const userItems = document.querySelectorAll('.user-item');
+    
+    userItems.forEach(item => {
+        const userRole = item.querySelector('p:nth-child(3)').textContent.toLowerCase();
+        
+        if (!selectedRole || userRole.includes(selectedRole)) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+});
+
+document.getElementById('statusFilter').addEventListener('change', function() {
+    const selectedStatus = this.value.toLowerCase();
+    const userItems = document.querySelectorAll('.user-item');
+    
+    userItems.forEach(item => {
+        const userStatus = item.querySelector('p:nth-child(2)').textContent.toLowerCase();
+        
+        if (!selectedStatus || userStatus.includes(selectedStatus)) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

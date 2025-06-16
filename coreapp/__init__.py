@@ -144,7 +144,7 @@ def create_app(config_name):
     def dashboard():
         logger.info("Helpline Dashboard Page")
         # You can pass any necessary data to your dashboard template here
-        return render_template('sneat/dashboard_content.html', title="Dashboard")
+        return render_template('sneat/index.html', title="Dashboard")
 
     # Call Data Route
     @app.route("/call-data", methods=['GET'])
@@ -156,7 +156,7 @@ def create_app(config_name):
     @app.route("/case-data", methods=['GET'])
     def case_data():
         logger.info("Helpline Case Data Page")
-        return render_template('sneat/casedata/case_data_content.html', title="Case Data")
+        return render_template('sneat/casedata/index.html', title="Case Data")
 
     # AI Services Route
     @app.route("/ai-services", methods=['GET'])
@@ -180,19 +180,66 @@ def create_app(config_name):
     @app.route("/chatbot", methods=['GET'])
     def chatbot():
         logger.info("Helpline Chatbot Page")
-        return render_template('sneat/chatbot/chatbot_content.html', title="Chatbot")
+        return render_template('sneat/chatbot/index.html', title="Chatbot")
 
     # Documentation Route
     @app.route("/documentation", methods=['GET'])
     def documentation():
         logger.info("Helpline Documentation Page")
-        return render_template('sneat/documentation/documentation_content.html', title="Documentation")
+        return render_template('sneat/documentation/index.html', title="Documentation")
 
     # Contacts Route
     @app.route("/contacts", methods=['GET'])
     def contacts():
         logger.info("Helpline Contacts Page")
-        return render_template('sneat/contacts/contacts_content.html', title="Contacts")
+        return render_template('sneat/contacts/index.html', title="Contacts")
+
+    # User Roles Route
+    @app.route("/useroles.html", methods=['GET'])
+    def useroles():
+        logger.info("Helpline User Roles Page")
+        return render_template('sneat/contacts/useroles.html', title="User Roles")
+    
+    # User Data Route
+    @app.route("/userdata", methods=['GET'])
+    def userdata():
+        logger.info("Helpline User Data Page")
+        return render_template('sneat/contacts/userdata.html', title="User Data")
+    
+    # Contacts Metadata Route
+    @app.route("/metadata", methods=['GET'])
+    def metadata():
+        logger.info("Helpline Contact Metadata Page")
+        return render_template('sneat/contacts/metadata.html', title="Contacts Metadata")
+
+    # Contacts AJAX Routes
+    @app.route("/contacts/new/", methods=['GET'])
+    def new_contact_form():
+        logger.info("New Contact Form")
+        return jsonify({
+            'html': '<h2>New Contact Form</h2><p>Contact form will be loaded here.</p>'
+        })
+
+    @app.route("/contacts/all/", methods=['GET'])
+    def all_contacts():
+        logger.info("All Contacts")
+        return jsonify({
+            'html': '<h2>All Contacts</h2><p>Contact list will be loaded here.</p>'
+        })
+
+    @app.route("/users/all/", methods=['GET'])
+    def all_users():
+        logger.info("All Users")
+        return jsonify({
+            'html': '<h2>All Users</h2><p>User list will be loaded here.</p>'
+        })
+
+    @app.route("/roles/manage/", methods=['GET'])
+    def manage_roles():
+        logger.info("Manage Roles")
+        return jsonify({
+            'html': '<h2>Manage Roles</h2><p>Role management interface will be loaded here.</p>'
+        })
 
     # Unified Data Route - Routes to appropriate blueprint based on filename
     @app.route("/data/<filename>", methods=['POST'])
@@ -742,5 +789,217 @@ def create_app(config_name):
             return jsonify({}), 500
 
         return render_template('errors/500.html')
+
+    # AJAX endpoints for reading sneat files
+    @app.route("/api/sneat/files", methods=['GET'])
+    def get_sneat_files():
+        """Get list of available sneat files"""
+        try:
+            import os
+            sneat_dir = os.path.join(app.root_path, 'templates', 'sneat')
+            files = []
+            
+            for root, dirs, filenames in os.walk(sneat_dir):
+                for filename in filenames:
+                    if filename.endswith('.html'):
+                        rel_path = os.path.relpath(os.path.join(root, filename), sneat_dir)
+                        files.append({
+                            'name': filename,
+                            'path': rel_path,
+                            'full_path': os.path.join(root, filename)
+                        })
+            
+            return jsonify({
+                'success': True,
+                'files': files,
+                'total': len(files)
+            })
+        except Exception as e:
+            logger.error(f"Error getting sneat files: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+
+    @app.route("/api/sneat/content/<path:filepath>", methods=['GET'])
+    def get_sneat_content(filepath):
+        """Get content of a specific sneat file"""
+        try:
+            import os
+            sneat_dir = os.path.join(app.root_path, 'templates', 'sneat')
+            full_path = os.path.join(sneat_dir, filepath)
+            
+            # Security check to prevent directory traversal
+            if not os.path.abspath(full_path).startswith(os.path.abspath(sneat_dir)):
+                return jsonify({
+                    'success': False,
+                    'error': 'Access denied'
+                }), 403
+            
+            if not os.path.exists(full_path):
+                return jsonify({
+                    'success': False,
+                    'error': 'File not found'
+                }), 404
+            
+            with open(full_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            return jsonify({
+                'success': True,
+                'content': content,
+                'filename': os.path.basename(full_path),
+                'path': filepath,
+                'size': len(content)
+            })
+        except Exception as e:
+            logger.error(f"Error reading sneat file {filepath}: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+
+    @app.route("/api/sneat/search", methods=['POST'])
+    def search_sneat_files():
+        """Search for content in sneat files"""
+        try:
+            import os
+            import re
+            from flask import request
+            
+            data = request.get_json()
+            search_term = data.get('search_term', '').lower()
+            
+            if not search_term:
+                return jsonify({
+                    'success': False,
+                    'error': 'Search term is required'
+                }), 400
+            
+            sneat_dir = os.path.join(app.root_path, 'templates', 'sneat')
+            results = []
+            
+            for root, dirs, filenames in os.walk(sneat_dir):
+                for filename in filenames:
+                    if filename.endswith('.html'):
+                        file_path = os.path.join(root, filename)
+                        rel_path = os.path.relpath(file_path, sneat_dir)
+                        
+                        try:
+                            with open(file_path, 'r', encoding='utf-8') as f:
+                                content = f.read()
+                            
+                            if search_term in content.lower():
+                                # Find line numbers where search term appears
+                                lines = content.split('\n')
+                                matches = []
+                                for i, line in enumerate(lines, 1):
+                                    if search_term in line.lower():
+                                        matches.append({
+                                            'line': i,
+                                            'content': line.strip()[:100] + '...' if len(line) > 100 else line.strip()
+                                        })
+                                
+                                results.append({
+                                    'filename': filename,
+                                    'path': rel_path,
+                                    'matches': matches,
+                                    'match_count': len(matches)
+                                })
+                        except Exception as e:
+                            logger.warning(f"Error reading file {file_path}: {str(e)}")
+                            continue
+            
+            return jsonify({
+                'success': True,
+                'results': results,
+                'total_files': len(results),
+                'search_term': search_term
+            })
+        except Exception as e:
+            logger.error(f"Error searching sneat files: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+
+    @app.route("/api/sneat/stats", methods=['GET'])
+    def get_sneat_stats():
+        """Get statistics about sneat files"""
+        try:
+            import os
+            from datetime import datetime
+            
+            sneat_dir = os.path.join(app.root_path, 'templates', 'sneat')
+            stats = {
+                'total_files': 0,
+                'total_size': 0,
+                'directories': [],
+                'file_types': {},
+                'last_modified': None,
+                'largest_file': None,
+                'recent_files': []
+            }
+            
+            all_files = []
+            
+            for root, dirs, filenames in os.walk(sneat_dir):
+                # Add directories
+                for dir_name in dirs:
+                    dir_path = os.path.relpath(os.path.join(root, dir_name), sneat_dir)
+                    stats['directories'].append(dir_path)
+                
+                # Process files
+                for filename in filenames:
+                    file_path = os.path.join(root, filename)
+                    rel_path = os.path.relpath(file_path, sneat_dir)
+                    
+                    try:
+                        file_stat = os.stat(file_path)
+                        file_size = file_stat.st_size
+                        file_modified = datetime.fromtimestamp(file_stat.st_mtime)
+                        
+                        file_info = {
+                            'name': filename,
+                            'path': rel_path,
+                            'size': file_size,
+                            'modified': file_modified.isoformat(),
+                            'extension': os.path.splitext(filename)[1]
+                        }
+                        
+                        all_files.append(file_info)
+                        stats['total_files'] += 1
+                        stats['total_size'] += file_size
+                        
+                        # Track file types
+                        ext = file_info['extension']
+                        stats['file_types'][ext] = stats['file_types'].get(ext, 0) + 1
+                        
+                        # Track last modified
+                        if not stats['last_modified'] or file_modified > datetime.fromisoformat(stats['last_modified']):
+                            stats['last_modified'] = file_modified.isoformat()
+                        
+                        # Track largest file
+                        if not stats['largest_file'] or file_size > stats['largest_file']['size']:
+                            stats['largest_file'] = file_info
+                            
+                    except Exception as e:
+                        logger.warning(f"Error getting stats for {file_path}: {str(e)}")
+                        continue
+            
+            # Get recent files (last 10 modified)
+            all_files.sort(key=lambda x: x['modified'], reverse=True)
+            stats['recent_files'] = all_files[:10]
+            
+            return jsonify({
+                'success': True,
+                'stats': stats
+            })
+        except Exception as e:
+            logger.error(f"Error getting sneat stats: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
 
     return app

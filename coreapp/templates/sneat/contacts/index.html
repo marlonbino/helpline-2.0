@@ -1,0 +1,258 @@
+{% extends "sneat/base.html" %}
+
+{% block extra_head %}
+<!-- Chart.js and Font Awesome are usually common dependencies, so keep them here -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<!-- Custom CSS for Contacts Dashboard -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sneat.css') }}">
+<!-- Assuming sneat.css is already linked via sneat/dashboard.html or another common place -->
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Contacts</li>
+{% endblock %}
+
+{% block content %}
+<div data-content-block="contacts">
+    <div class="contact-overview">
+        <!-- Ring Charts Section - Independent -->
+        <div class="main-metrics">
+            <div class="metric-ring">
+                <canvas id="totalContactsRing" width="180" height="180"></canvas>
+                <div class="ring-center">
+                    <div class="ring-number" id="totalContactsDisplay">1,247</div>
+                    <div class="ring-label">Total Contacts</div>
+                </div>
+            </div>
+            
+            <div class="metric-ring">
+                <canvas id="totalUsersRing" width="180" height="180"></canvas>
+                <div class="ring-center">
+                    <div class="ring-number" id="totalUsersDisplay">25</div>
+                    <div class="ring-label">Total Users</div>
+                </div>
+            </div>
+            
+            <div class="metric-ring">
+                <canvas id="totalRolesRing" width="180" height="180"></canvas>
+                <div class="ring-center">
+                    <div class="ring-number" id="totalRolesDisplay">4</div>
+                    <div class="ring-label">Active Roles</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contact Details in One Row -->
+        <div class="contact-details-row">
+            <!-- Contact Status Gauge -->
+            <div class="contact-gauge">
+                <div class="gauge-title">📞 Contact Status</div>
+                <canvas id="contactStatusGauge" width="280" height="140"></canvas>
+            </div>
+            
+            <!-- Contact Channels Visual -->
+            <div class="contact-methods-visual">
+                <div class="gauge-title">📱 Contact Channels</div>
+                <div class="methods-bars">
+                    <div class="method-bar">
+                        <div class="method-info">
+                            <span class="method-icon">📞</span>
+                            <span class="method-name">Phone</span>
+                            <span class="method-count">810</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill phone-progress"></div>
+                        </div>
+                    </div>
+                    <div class="method-bar">
+                        <div class="method-info">
+                            <span class="method-icon">💬</span>
+                            <span class="method-name">Chat</span>
+                            <span class="method-count">312</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill chat-progress"></div>
+                        </div>
+                    </div>
+                    <div class="method-bar">
+                        <div class="method-info">
+                            <span class="method-icon">📧</span>
+                            <span class="method-name">Email</span>
+                            <span class="method-count">87</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill email-progress"></div>
+                        </div>
+                    </div>
+                    <div class="method-bar">
+                        <div class="method-info">
+                            <span class="method-icon">📱</span>
+                            <span class="method-name">SMS</span>
+                            <span class="method-count">38</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill sms-progress"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact Flow Timeline -->
+            <div class="contact-timeline">
+                <div class="chart-title">📈 Contact Flow Timeline</div>
+                <canvas id="contactFlowChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="user-roles-section">
+        <div class="chart-title">👥 Staff & User Roles</div>
+        <div class="roles-grid">
+            <div class="role-card">
+                <h3>Counselors</h3>
+                <div class="count" id="counselorCount">12</div>
+                <p>Active counselors</p>
+            </div>
+            <div class="role-card">
+                <h3>Supervisors</h3>
+                <div class="count" id="supervisorCount">3</div>
+                <p>Shift supervisors</p>
+            </div>
+            <div class="role-card">
+                <h3>Administrators</h3>
+                <div class="count" id="adminCount">2</div>
+                <p>System admins</p>
+            </div>
+            <div class="role-card">
+                <h3>Volunteers</h3>
+                <div class="count" id="volunteerCount">8</div>
+                <p>Active volunteers</p>
+            </div>
+            <div class="role-card">
+                <h3>On Duty</h3>
+                <div class="count" id="onDutyCount">6</div>
+                <p>Currently available</p>
+            </div>
+            <div class="role-card">
+                <h3>Total Users</h3>
+                <div class="count" id="totalUsers">25</div>
+                <p>All registered users</p>
+            </div>
+        </div>
+        
+        <div class="navigation-buttons">
+            <button class="btn" id="viewUsersBtn">View Users</button>
+            <a href="{{ url_for('useroles') }}" class="btn">🔧 Manage Roles</a>
+        </div>
+    </div>
+    
+    <div style="text-align: right; margin-top: 15px;">
+        <button class="btn" id="viewContactsBtn">View Contacts</button>
+    </div>
+</div>
+
+<!-- Modal Structure -->
+<div id="contactModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="modalContent"></div>
+    </div>
+</div>
+
+<style>
+/* Additional CSS for the new layout */
+.contact-overview {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.main-metrics {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.metric-ring {
+    position: relative;
+    flex: 1;
+}
+
+.contact-details-row {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+}
+
+.contact-gauge, .contact-methods-visual, .contact-timeline {
+    flex: 1;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-height: 200px;
+}
+
+.contact-timeline {
+    flex: 1.5; /* Give timeline a bit more space */
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .contact-details-row {
+        flex-wrap: wrap;
+    }
+    
+    .contact-gauge, .contact-methods-visual {
+        flex-basis: calc(50% - 10px);
+    }
+    
+    .contact-timeline {
+        flex-basis: 100%;
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-metrics {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .contact-details-row {
+        flex-direction: column;
+    }
+    
+    .contact-gauge, .contact-methods-visual, .contact-timeline {
+        flex: none;
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Custom JavaScript for Contacts Dashboard -->
+<script src="{{ url_for('static', filename='js/sneat.js') }}"></script>
+<!-- Assuming sneat.js is already linked via sneat/dashboard.html or another common place -->
+
+<script>
+// Initialize contacts dashboard functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize contact dashboard charts and functionality
+    if (typeof initializeContactsDashboard === 'function') {
+        initializeContactsDashboard();
+    } else {
+        // Fallback to basic initialization
+        console.log('initializeContactsDashboard not found, using fallback');
+        if (typeof initCharts === 'function') {
+            initCharts();
+        }
+    }
+});
+</script>
+{% endblock %}

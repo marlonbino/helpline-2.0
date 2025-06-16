@@ -1,0 +1,60 @@
+/* File: static/css/custom.css */
+
+/* Adjust the overall padding of the sidebar itself */
+.sidebar {
+    /* This value will control how far the entire content (logo, titles, nav items)
+       is from the *very left edge* of the dark sidebar background.
+       Adjust '1rem' to your desired minimal spacing. '0' would be completely flush. */
+    padding-left: 1rem; 
+    /* Maintain consistent right padding if you want */
+    padding-right: 1rem;
+    /* You might want to adjust top/bottom padding as well if they are too large */
+    /* padding-top: 1.5rem; */ 
+    /* padding-bottom: 1.5rem; */
+}
+
+/* Adjust padding for the main navigation items */
+.sidebar .nav-item {
+    /* This controls the internal spacing of each main menu item.
+       Setting a consistent padding (e.g., 0.75rem all around) is generally good. */
+    padding: 0.75rem 0.75rem;
+    /* Ensure no extra margins are pushing it */
+    margin-left: 0;
+}
+
+/* Adjust padding for the sub-menu navigation links */
+.sidebar .nav-link.sub-item {
+    /* Provide a deeper indentation for sub-items for visual hierarchy.
+       The last value (1.5rem) is the left padding. */
+    padding: 0.5rem 0.75rem 0.5rem 1.5rem; 
+    margin-left: 0;
+}
+
+/* Adjust padding for section titles (e.g., "OPERATIONS", "RESOURCES") */
+.sidebar .nav-title {
+    /* Align with the main nav items */
+    padding-left: 0.75rem; 
+    /* Ensure no extra margins */
+    margin-left: 0;
+}
+
+/* Adjust padding for the logo and profile section to align them with the new scheme */
+.sidebar .logo,
+.sidebar .profile-section {
+    padding-left: 0.75rem; /* Match the indentation of main nav items */
+    margin-left: 0; /* Ensure no additional margin */
+}
+
+/* For the collapse submenus, ensure their UL also doesn't add extra unexpected padding (common in Bootstrap) */
+.sidebar .collapse .nav {
+    padding-left: 0; /* Remove default Bootstrap list padding */
+}
+
+/* Ensure icons and text within nav items are aligned correctly */
+.sidebar .nav-item .nav-icon,
+.sidebar .nav-link.sub-item .nav-icon {
+    /* This controls the space between the icon and the text */
+    margin-right: 0.5rem; 
+    /* Ensure vertical alignment if needed */
+    vertical-align: middle;
+} 

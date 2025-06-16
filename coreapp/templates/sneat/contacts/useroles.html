@@ -1,0 +1,229 @@
+{% extends "sneat/base.html" %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('contacts') }}">Contacts</a></li>
+<li class="breadcrumb-item active">User Roles</li>
+{% endblock %}
+
+{% block content %}
+<div data-content-block="user-roles">
+    <div class="header">
+        <div>
+            <h1>🔧 User Roles Management</h1>
+            <p style="margin: 0; opacity: 0.9; font-size: 0.95em;">Manage system users and their permissions</p>
+        </div>
+        <button class="btn" id="addUserBtn">➕ Add New User</button>
+    </div>
+
+    <div class="roles-overview">
+        <div class="role-card">
+            <h3>👨‍💼 Administrators</h3>
+            <div class="count" id="adminCount">2</div>
+            <div class="description">Full system access</div>
+        </div>
+        <div class="role-card">
+            <h3>👥 Supervisors</h3>
+            <div class="count" id="supervisorCount">3</div>
+            <div class="description">Team oversight</div>
+        </div>
+        <div class="role-card">
+            <h3>📞 Counselors</h3>
+            <div class="count" id="counselorCount">12</div>
+            <div class="description">Direct client support</div>
+        </div>
+        <div class="role-card">
+            <h3>🤝 Volunteers</h3>
+            <div class="count" id="volunteerCount">8</div>
+            <div class="description">Community helpers</div>
+        </div>
+        <div class="role-card">
+            <h3>🟢 Online Now</h3>
+            <div class="count" id="onlineCount">6</div>
+            <div class="description">Currently active</div>
+        </div>
+    </div>
+
+    <div class="main-content-grid">
+        <div class="users-section">
+            <div class="section-title">
+                👥 User Management
+            </div>
+
+            <div class="filter-controls">
+                <input type="text" class="search-box" placeholder="Search users..." id="userSearch">
+                <select class="filter-select" id="roleFilter">
+                    <option value="">All Roles</option>
+                    <option value="admin">Administrator</option>
+                    <option value="supervisor">Supervisor</option>
+                    <option value="counselor">Counselor</option>
+                    <option value="volunteer">Volunteer</option>
+                </select>
+                <select class="filter-select" id="statusFilter">
+                    <option value="">All Status</option>
+                    <option value="online">Online</option>
+                    <option value="offline">Offline</option>
+                    <option value="busy">Busy</option>
+                </select>
+            </div>
+
+            <div class="user-list" id="userList">
+                <div class="user-item" data-user-id="1">
+                    <div class="user-info">
+                        <div class="user-avatar">JD</div>
+                        <div class="user-details">
+                            <h4>John Doe</h4>
+                            <p>
+                                <span class="status-indicator status-online"></span>
+                                john.doe@helpline.org
+                            </p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="role-badge role-admin">Administrator</span>
+                        <button class="btn" onclick="editUser('1')" style="padding: 4px 8px; font-size: 0.75em;">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteUser('1')" style="padding: 4px 8px; font-size: 0.75em;">Delete</button>
+                    </div>
+                </div>
+                <div class="user-item" data-user-id="2">
+                    <div class="user-info">
+                        <div class="user-avatar">JS</div>
+                        <div class="user-details">
+                            <h4>Jane Smith</h4>
+                            <p>
+                                <span class="status-indicator status-online"></span>
+                                jane.smith@helpline.org
+                            </p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="role-badge role-supervisor">Supervisor</span>
+                        <button class="btn" onclick="editUser('2')" style="padding: 4px 8px; font-size: 0.75em;">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteUser('2')" style="padding: 4px 8px; font-size: 0.75em;">Delete</button>
+                    </div>
+                </div>
+                <div class="user-item" data-user-id="3">
+                    <div class="user-info">
+                        <div class="user-avatar">MJ</div>
+                        <div class="user-details">
+                            <h4>Mike Johnson</h4>
+                            <p>
+                                <span class="status-indicator status-busy"></span>
+                                mike.johnson@helpline.org
+                            </p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="role-badge role-counselor">Counselor</span>
+                        <button class="btn" onclick="editUser('3')" style="padding: 4px 8px; font-size: 0.75em;">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteUser('3')" style="padding: 4px 8px; font-size: 0.75em;">Delete</button>
+                    </div>
+                </div>
+                <div class="user-item" data-user-id="4">
+                    <div class="user-info">
+                        <div class="user-avatar">SW</div>
+                        <div class="user-details">
+                            <h4>Sarah Wilson</h4>
+                            <p>
+                                <span class="status-indicator status-offline"></span>
+                                sarah.wilson@helpline.org
+                            </p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="role-badge role-volunteer">Volunteer</span>
+                        <button class="btn" onclick="editUser('4')" style="padding: 4px 8px; font-size: 0.75em;">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteUser('4')" style="padding: 4px 8px; font-size: 0.75em;">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="permissions-section">
+            <div class="section-title">
+                🔐 Role Permissions
+            </div>
+
+            <div class="form-group">
+                <label for="selectedRole">Select Role to Edit:</label>
+                <select id="selectedRole" class="filter-select" style="width: 100%;">
+                    <option value="admin">Administrator</option>
+                    <option value="supervisor">Supervisor</option>
+                    <option value="counselor">Counselor</option>
+                    <option value="volunteer">Volunteer</option>
+                </select>
+            </div>
+
+            <div class="permissions-grid" id="permissionsGrid">
+                </div>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <a href="{{ url_for('contacts') }}" class="btn btn-secondary">⬅️ Back to Contacts</a>
+        <button class="btn" id="savePermissionsBtn">💾 Save Changes</button>
+        <button class="btn btn-danger" id="resetPermissionsBtn">🔄 Reset to Default</button>
+    </div>
+
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle">Add New User</h2>
+            <form id="userForm" method="post" action="/api/users">
+                <div class="form-group">
+                    <label for="userName">Full Name:</label>
+                    <input type="text" id="userName" name="full_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="userEmail">Email:</label>
+                    <input type="email" id="userEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="userRole">Role:</label>
+                    <select id="userRole" name="role" required>
+                        <option value="">Select Role</option>
+                        <option value="admin">Administrator</option>
+                        <option value="supervisor">Supervisor</option>
+                        <option value="counselor">Counselor</option>
+                        <option value="volunteer">Volunteer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="userPhone">Phone (optional):</label>
+                    <input type="tel" id="userPhone" name="phone">
+                </div>
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn">Save User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Custom JavaScript for User Roles Management -->
+<script>
+// Initialize user roles management functionality
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing User Roles Management...');
+    
+    // Check if the required functions exist and initialize them
+    if (typeof setupEventListeners === 'function') {
+        setupEventListeners();
+    }
+    
+    if (typeof renderPermissions === 'function') {
+        renderPermissions();
+    }
+    
+    // Check if users exist and update counts
+    const userItems = document.querySelectorAll('.user-item[data-user-id]');
+    if (userItems.length > 0 && typeof updateRoleCounts === 'function') {
+        updateRoleCounts();
+    }
+    
+    console.log('User Roles Management initialized successfully');
+});
+</script>
+{% endblock %}

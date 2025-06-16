@@ -1,0 +1,176 @@
+{% extends "sneat/base.html" %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/sneat.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="header-left">
+            <h1>Main Dashboard</h1>
+            <div class="header-subtitle">Real-time overview of helpline operations and performance metrics</div>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-outline-primary" onclick="refreshDashboard()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+            <button class="btn btn-primary" onclick="exportDashboardData()">
+                <i class="fas fa-download"></i> Export Report
+            </button>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="dashboardSearch" placeholder="Search cases, calls, or staff...">
+        </div>
+        <div class="filter-group">
+            <select id="timeFilter" class="filter-select">
+                <option value="today">Today</option>
+                <option value="week" selected>This Week</option>
+                <option value="month">This Month</option>
+                <option value="quarter">This Quarter</option>
+                <option value="year">This Year</option>
+            </select>
+            <select id="viewFilter" class="filter-select">
+                <option value="all">All Data</option>
+                <option value="calls">Calls Only</option>
+                <option value="cases">Cases Only</option>
+                <option value="staff">Staff Only</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="quick-stats">
+        <div class="quick-stat">
+            <div class="quick-stat-value" id="totalSessions">1,247</div>
+            <div class="quick-stat-label">Total Sessions</div>
+        </div>
+        <div class="quick-stat">
+            <div class="quick-stat-value" id="avgSessionTime">12.5m</div>
+            <div class="quick-stat-label">Avg Session Time</div>
+        </div>
+        <div class="quick-stat">
+            <div class="quick-stat-value" id="satisfactionRate">94.2%</div>
+            <div class="quick-stat-label">Satisfaction Rate</div>
+        </div>
+        <div class="quick-stat">
+            <div class="quick-stat-value" id="peakHours">2-4 PM</div>
+            <div class="quick-stat-label">Peak Hours</div>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📞</div>
+            <div class="stat-label">Total Calls Today</div>
+            <div class="stat-value" id="totalCalls">387</div>
+            <div class="stat-change stat-positive">↗ +18.2%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Active Calls:</span>
+                <span class="stat-footer-value" id="activeCalls">12</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📁</div>
+            <div class="stat-label">Active Cases</div>
+            <div class="stat-value" id="activeCases">156</div>
+            <div class="stat-change stat-positive">↗ +8.5%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Urgent:</span>
+                <span class="stat-footer-value" id="urgentCases">23</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-label">Active Staff</div>
+            <div class="stat-value" id="activeStaff">28</div>
+            <div class="stat-change stat-neutral">→ No Change</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Available:</span>
+                <span class="stat-footer-value" id="availableStaff">24</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-label">Avg Response Time</div>
+            <div class="stat-value" id="avgResponseTime">1.2m</div>
+            <div class="stat-change stat-positive">↓ -15%</div>
+            <div class="stat-footer">
+                <span class="stat-footer-label">Target:</span>
+                <span class="stat-footer-value">2.0m</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="chart-section">
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <h3>Call Volume & Case Trends</h3>
+                    <div class="chart-actions">
+                        <button class="btn btn-sm active" data-view="daily">Daily</button>
+                        <button class="btn btn-sm" data-view="weekly">Weekly</button>
+                        <button class="btn btn-sm" data-view="monthly">Monthly</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="trendsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Case Distribution</h3>
+                    <div class="chart-actions">
+                        <select class="filter-select" id="distributionType">
+                            <option value="category">By Category</option>
+                            <option value="priority">By Priority</option>
+                            <option value="status">By Status</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="distributionChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Staff Performance</h3>
+                    <div class="chart-actions">
+                        <select class="filter-select" id="performanceMetric">
+                            <option value="cases">Cases Handled</option>
+                            <option value="resolution">Resolution Rate</option>
+                            <option value="satisfaction">Satisfaction</option>
+                            <option value="response">Response Time</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="activity-section">
+            <div class="activity-header">
+                <h3>Recent Activity</h3>
+                <button class="btn btn-link" onclick="refreshActivity()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+            <div class="activity-list" id="recentActivity">
+                </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sneat.js') }}"></script>
+{% endblock %}

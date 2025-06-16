@@ -1,0 +1,168 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sneat.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+
+<div class="sidebar">
+    <div class="logo">Helpline 2.0</div>
+    
+    <div class="nav-section">
+        <div class="nav-title">Operations</div>
+        
+        <a href="/dashboard" class="nav-item" data-filename="dashboard" onclick="handleDashboardClick(event)">
+            <div class="nav-icon">📊</div>
+            <span>Main Dashboard</span>
+        </a>
+        
+        <a href="#callDataDashboardSubmenu" class="nav-item dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
+            <div class="nav-icon">📞</div>
+            <span>Call Data</span>
+        </a>
+        <div class="collapse" id="callDataDashboardSubmenu">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="/call-data" class="nav-link sub-item py-1" data-filename="call_data">
+                        <div class="nav-icon">📊</div>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="collapse" id="callDataUsersSubmenu">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="/call-data" class="nav-link sub-item py-1" data-filename="call_data">
+                        <div class="nav-icon">📊</div>
+                        <span>Users</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="collapse" id="callDataRolesSubmenu">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="#" class="nav-link sub-item py-1" data-filename="call_data">
+                        <div class="nav-icon">📊</div>
+                        <span>Roles</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <a href="#caseDataSubmenu" class="nav-item dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
+            <div class="nav-icon">📋</div>
+            <span>Case Data</span>
+        </a>
+        <div class="collapse" id="caseDataSubmenu">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="/case-data" class="nav-link sub-item py-1" data-filename="case_data">
+                        <div class="nav-icon">📊</div>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <a href="#aiServicesSubmenu" class="nav-item dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
+            <div class="nav-icon">🤖</div>
+            <span>AI Services</span>
+        </a>
+        <div class="collapse" id="aiServicesSubmenu">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="/ai-services" class="nav-link sub-item py-1" data-filename="ai_services">
+                        <div class="nav-icon">📊</div>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <a href="#usersRolesSubmenu" class="nav-item dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
+            <div class="nav-icon">👥</div>
+            <span>Users & Roles</span>
+        </a>
+        <div class="collapse" id="usersRolesSubmenu">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="/users-roles" class="nav-link sub-item py-1" data-filename="users_roles">
+                        <div class="nav-icon">📊</div>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <a href="#contactsSubmenu" class="nav-item dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
+            <div class="nav-icon">👥</div>
+            <span>Contacts</span>
+        </a>
+        <div class="collapse" id="contactsSubmenu">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="/contacts" class="nav-link sub-item py-1" data-filename="contacts">
+                        <div class="nav-icon">📊</div>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <a href="#systemServicesSubmenu" class="nav-item dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
+            <div class="nav-icon">⚙️</div>
+            <span>System Services</span>
+        </a>
+        <div class="collapse" id="systemServicesSubmenu">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="/system-services" class="nav-link sub-item py-1">
+                        <div class="nav-icon">📊</div>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <a href="#chatbotSubmenu" class="nav-item dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
+            <div class="nav-icon">🤖</div>
+            <span>Chatbot</span>
+        </a>
+        <div class="collapse" id="chatbotSubmenu">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="/chatbot" class="nav-link sub-item py-1" data-filename="chatbot">
+                        <div class="nav-icon">📊</div>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <a href="#documentationSubmenu" class="nav-item dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
+            <div class="nav-icon">📚</div>
+            <span>Documentation</span>
+        </a>
+        <div class="collapse" id="documentationSubmenu">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="/documentation" class="nav-link sub-item py-1" data-filename="documentation">
+                        <div class="nav-icon">📊</div>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div class="profile-section">
+        <div class="profile-avatar"></div>
+        <div class="profile-info">
+            <div class="profile-name">Marlon</div>
+            <div class="profile-status">Counselor</div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/sneat.js') }}"></script>

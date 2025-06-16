@@ -69,21 +69,21 @@ def index():
 
         if x.get('userid') is None:
             logger.debug("""Contacts Create""")
-            return render_template('viewone/contacts/index.html')
+            return render_template('sneat/contacts/index.html')
 
         # Remove dashboard dependency - just use empty data for now
         # x = dashboard.indexweb(x)
         
         if x.get('item') is not None:
             logger.debug("""Contacts Template""")
-            return render_template('viewone/contacts/' + x.get(
+            return render_template('sneat/contacts/' + x.get(
                 'item') + '.html', data=x.get('data'))
 
     except Exception as e:
         data['error'] = "Error Index-Template Contacts {}".format(e)
         logger.critical(data['error'])
 
-    return render_template('viewone/errors/404.html')
+    return render_template('errors/404.html')
 
 
 @bp.route("/data/<filename>", methods=['POST'])
@@ -191,3 +191,4 @@ def resets(filename):
         logger.critical(data['error'])
 
     return jsonify(data), 404
+
