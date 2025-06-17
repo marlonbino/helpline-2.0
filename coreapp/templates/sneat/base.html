@@ -45,5 +45,34 @@
     
     <!-- Custom JavaScript -->
     {% block extra_js %}{% endblock %}
+    
+    <!-- Global Theme Initialization -->
+    <script>
+        // Apply theme immediately on page load
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.body.setAttribute('data-theme', savedTheme);
+            
+            // Apply theme to sidebar and main content immediately
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (sidebar) {
+                if (savedTheme === 'light') {
+                    sidebar.style.background = 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)';
+                } else {
+                    sidebar.style.background = 'linear-gradient(135deg, #2d1b14 0%, #5d4037 100%)';
+                }
+            }
+            
+            if (mainContent) {
+                if (savedTheme === 'light') {
+                    mainContent.style.background = 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)';
+                } else {
+                    mainContent.style.background = 'linear-gradient(135deg, #2d1b14 0%, #5d4037 100%)';
+                }
+            }
+        })();
+    </script>
 </body>
 </html>

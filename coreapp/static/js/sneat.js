@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize accordion menu behavior
+    initializeAccordionMenu();
+    
     // Initialize all charts
     initCharts();
     
@@ -31,7 +34,108 @@ document.addEventListener('DOMContentLoaded', function() {
     if (userItems.length > 0) {
         updateRoleCounts();
     }
+
+    // Initialize theme on page load
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.body.setAttribute('data-theme', savedTheme);
+    applyTheme(savedTheme);
+    
+    // Update button text and icon
+    const themeBtn = document.querySelector('.theme-btn span');
+    const themeIcon = document.querySelector('.theme-btn .nav-icon');
+    
+    if (themeBtn) {
+        themeBtn.textContent = savedTheme === 'dark' ? 'Light Theme' : 'Dark Theme';
+    }
+    
+    if (themeIcon) {
+        themeIcon.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    }
 });
+
+// Accordion menu functionality - ensures only one dropdown is open at a time
+function initializeAccordionMenu() {
+    const dropdownToggles = document.querySelectorAll('.dropdown-toggle[href^="#"]');
+    
+    dropdownToggles.forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const targetId = this.getAttribute('href');
+            const targetCollapse = document.querySelector(targetId);
+            
+            if (!targetCollapse) {
+                console.warn('Target collapse element not found:', targetId);
+                return;
+            }
+            
+            // Close all other open dropdowns
+            const allCollapses = document.querySelectorAll('.collapse.show');
+            allCollapses.forEach(collapse => {
+                if (collapse !== targetCollapse) {
+                    // Remove show class and update aria-expanded
+                    collapse.classList.remove('show');
+                    const correspondingToggle = document.querySelector(`[href="#${collapse.id}"]`);
+                    if (correspondingToggle) {
+                        correspondingToggle.setAttribute('aria-expanded', 'false');
+                        // Remove active styling
+                        correspondingToggle.classList.remove('active');
+                    }
+                }
+            });
+            
+            // Toggle the clicked dropdown
+            const isCurrentlyOpen = targetCollapse.classList.contains('show');
+            
+            if (isCurrentlyOpen) {
+                // Close the dropdown
+                targetCollapse.classList.remove('show');
+                this.setAttribute('aria-expanded', 'false');
+                this.classList.remove('active');
+            } else {
+                // Open the dropdown
+                targetCollapse.classList.add('show');
+                this.setAttribute('aria-expanded', 'true');
+                this.classList.add('active');
+            }
+            
+            // Add a small delay to ensure smooth animation
+            setTimeout(() => {
+                // Scroll the sidebar if needed to show the opened dropdown
+                if (!isCurrentlyOpen && targetCollapse) {
+                    const sidebar = document.querySelector('.sidebar');
+                    const toggleRect = this.getBoundingClientRect();
+                    const sidebarRect = sidebar.getBoundingClientRect();
+                    
+                    // Check if the dropdown extends below the visible area
+                    const dropdownBottom = toggleRect.bottom + targetCollapse.offsetHeight;
+                    const sidebarBottom = sidebarRect.bottom;
+                    
+                    if (dropdownBottom > sidebarBottom) {
+                        sidebar.scrollTop += dropdownBottom - sidebarBottom + 20; // Add some padding
+                    }
+                }
+            }, 100);
+        });
+    });
+    
+    // Handle clicks outside dropdowns to close them (optional)
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.sidebar')) {
+            const openDropdowns = document.querySelectorAll('.collapse.show');
+            openDropdowns.forEach(dropdown => {
+                dropdown.classList.remove('show');
+                const toggle = document.querySelector(`[href="#${dropdown.id}"]`);
+                if (toggle) {
+                    toggle.setAttribute('aria-expanded', 'false');
+                    toggle.classList.remove('active');
+                }
+            });
+        }
+    });
+    
+    console.log('Accordion menu initialized - only one dropdown can be open at a time');
+}
 
 // Global chart variables
 let totalContactsChart, totalUsersChart, totalRolesChart, contactStatusGaugeChart, contactFlowChart;
@@ -321,6 +425,7 @@ function setupEventListeners() {
     const userModal = document.getElementById('userModal');
     const addUserBtn = document.getElementById('addUserBtn');
     const cancelBtn = document.getElementById('cancelBtn');
+    const userModalCloseBtn = document.querySelector('#userModal .close');
 
     // Modal controls
     addUserBtn.addEventListener('click', () => {
@@ -331,12 +436,27 @@ function setupEventListeners() {
         userModal.style.display = 'block';
     });
 
+    // Close button (×) event listener
+    if (userModalCloseBtn) {
+        userModalCloseBtn.addEventListener('click', () => {
+            userModal.style.display = 'none';
+        });
+    }
+
     cancelBtn.addEventListener('click', () => {
         userModal.style.display = 'none';
     });
 
+    // Close modal when clicking outside
     window.addEventListener('click', (event) => {
         if (event.target === userModal) {
+            userModal.style.display = 'none';
+        }
+    });
+
+    // Close modal with ESC key
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && userModal.style.display === 'block') {
             userModal.style.display = 'none';
         }
     });
@@ -1818,3 +1938,122 @@ function resetPermissions() {
         alert('Permissions display reset to default values. Click "Save Changes" to apply this permanently.');
     }
 }
+
+// Theme Toggle Function
+function toggleTheme() {
+    const body = document.body;
+    const currentTheme = body.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    // Update theme attribute on body
+    body.setAttribute('data-theme', newTheme);
+    
+    // Store theme preference
+    localStorage.setItem('theme', newTheme);
+    
+    // Update theme button text
+    const themeBtn = document.querySelector('.theme-btn span');
+    if (themeBtn) {
+        themeBtn.textContent = newTheme === 'dark' ? 'Light Theme' : 'Dark Theme';
+    }
+    
+    // Update theme icon
+    const themeIcon = document.querySelector('.theme-btn .nav-icon');
+    if (themeIcon) {
+        themeIcon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    }
+    
+    // Apply theme changes globally
+    applyTheme(newTheme);
+}
+
+// Apply Theme Function - Global Application
+function applyTheme(theme) {
+    // Apply to all sidebar elements
+    const sidebars = document.querySelectorAll('.sidebar');
+    const mainContents = document.querySelectorAll('.main-content');
+    
+    sidebars.forEach(sidebar => {
+        if (theme === 'light') {
+            sidebar.style.background = 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)';
+        } else {
+            sidebar.style.background = 'linear-gradient(135deg, #2d1b14 0%, #5d4037 100%)';
+        }
+    });
+    
+    mainContents.forEach(mainContent => {
+        if (theme === 'light') {
+            mainContent.style.background = 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)';
+        } else {
+            mainContent.style.background = 'linear-gradient(135deg, #2d1b14 0%, #5d4037 100%)';
+        }
+    });
+    
+    // Apply theme to all dashboard elements
+    applyThemeToElements(theme);
+}
+
+// Apply theme to all dashboard elements
+function applyThemeToElements(theme) {
+    // Apply to all cards, headers, buttons, etc.
+    const elements = {
+        '.dashboard-header': theme === 'light' ? 
+            'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)' : 
+            'linear-gradient(135deg, rgba(45, 27, 20, 0.9) 0%, rgba(93, 64, 55, 0.8) 100%)',
+        '.stat-card': theme === 'light' ? 
+            'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)' : 
+            'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 245, 220, 0.95) 100%)',
+        '.chart-card': theme === 'light' ? '#ffffff' : 'white',
+        '.activity-card': theme === 'light' ? '#ffffff' : 'white',
+        '.quick-actions': theme === 'light' ? '#ffffff' : 'white',
+        '.metric-ring': theme === 'light' ? 
+            'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)' : 
+            'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+        '.contact-gauge, .contact-methods-visual, .contact-timeline': theme === 'light' ? '#ffffff' : '#fff',
+        '.role-card': theme === 'light' ? '#ffffff' : '#fff',
+        '.user-list': theme === 'light' ? '#ffffff' : '#fff',
+        '.permissions-section': theme === 'light' ? '#ffffff' : '#fff'
+    };
+    
+    // Apply styles to all matching elements
+    Object.keys(elements).forEach(selector => {
+        const elementList = document.querySelectorAll(selector);
+        elementList.forEach(element => {
+            if (selector.includes('background') || selector.includes('gradient')) {
+                element.style.background = elements[selector];
+            } else {
+                element.style.backgroundColor = elements[selector];
+            }
+        });
+    });
+}
+
+// Initialize theme on page load - Global
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.body.setAttribute('data-theme', savedTheme);
+    
+    // Apply theme globally
+    applyTheme(savedTheme);
+    
+    // Update button text and icon
+    const themeBtn = document.querySelector('.theme-btn span');
+    const themeIcon = document.querySelector('.theme-btn .nav-icon');
+    
+    if (themeBtn) {
+        themeBtn.textContent = savedTheme === 'dark' ? 'Light Theme' : 'Dark Theme';
+    }
+    
+    if (themeIcon) {
+        themeIcon.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    }
+});
+
+// Apply theme when navigating between pages
+window.addEventListener('load', function() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (document.body.getAttribute('data-theme') !== savedTheme) {
+        document.body.setAttribute('data-theme', savedTheme);
+        applyTheme(savedTheme);
+    }
+});

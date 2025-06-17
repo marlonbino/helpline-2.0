@@ -124,7 +124,6 @@ body {
     color: var(--golden-highlight);
     text-transform: uppercase;
     letter-spacing: 1px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
     border-left: 4px solid var(--golden-highlight);
     margin-left: 20px;
     margin-bottom: 3px;
@@ -152,19 +151,7 @@ body {
 
 .sidebar .nav-item::before,
 .sidebar .nav-link::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, 
-        rgba(255, 213, 79, 0.1) 0%, 
-        rgba(161, 136, 127, 0.1) 100%);
-    border-radius: 12px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: -1;
+    /* Removed gradient shine effect */
 }
 
 .sidebar .nav-item:hover,
@@ -173,42 +160,31 @@ body {
     transform: translateX(8px);
     text-decoration: none;
     border-color: var(--chocolate-accent);
-    box-shadow: var(--shadow-medium);
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .sidebar .nav-item:hover::before,
 .sidebar .nav-link:hover::before {
-    opacity: 1;
+    /* Removed gradient shine effect */
 }
 
 .sidebar .nav-item:hover .nav-icon,
 .sidebar .nav-link:hover .nav-icon {
-    transform: scale(1.2) rotate(5deg);
-    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+    transform: scale(1.1);
+    color: var(--golden-highlight);
+    /* Remove shiny effects on hover */
+    text-shadow: none;
+    filter: none;
 }
 
 .sidebar .nav-item.active,
 .sidebar .nav-link.active {
     color: var(--golden-highlight);
-    background: linear-gradient(135deg, 
-        rgba(255, 213, 79, 0.2) 0%, 
-        rgba(161, 136, 127, 0.2) 100%);
+    background: rgba(255, 213, 79, 0.2);
     border-color: var(--golden-highlight);
-    box-shadow: var(--shadow-medium);
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .sidebar .nav-icon {
-    width: 24px;
-    height: 24px;
-    margin-right: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    transition: all 0.3s ease;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    display: none !important;
 }
 
 /* Dropdown specific styles */
@@ -238,9 +214,7 @@ body {
 }
 
 .sidebar .collapse {
-    background: linear-gradient(135deg, 
-        rgba(45, 27, 20, 0.6) 0%, 
-        rgba(93, 64, 55, 0.4) 100%);
+    background: rgba(45, 27, 20, 0.6);
     border-left: 3px solid var(--chocolate-accent);
     margin: 8px 20px 15px 40px;
     border-radius: 8px;
@@ -265,27 +239,27 @@ body {
 }
 
 .sidebar .collapse .nav-link.sub-item:hover {
-    background: linear-gradient(135deg, 
-        rgba(255, 213, 79, 0.2) 0%, 
-        rgba(161, 136, 127, 0.2) 100%) !important;
+    background: rgba(255, 213, 79, 0.2) !important;
     color: var(--golden-highlight) !important;
     transform: translateX(5px) !important;
     border-color: var(--chocolate-accent) !important;
 }
 
 .sidebar .collapse .nav-link.sub-item .nav-icon {
-    width: 18px;
-    height: 18px;
-    font-size: 14px;
-    margin-right: 10px;
+    display: none !important;
+}
+
+.sidebar .collapse .nav-link.sub-item:hover .nav-icon {
+    color: var(--golden-highlight);
+    /* Remove shiny effects on hover */
+    text-shadow: none;
+    filter: none;
 }
 
 .sidebar .profile-section {
     padding: 25px;
     border-top: 2px solid var(--chocolate-accent);
-    background: linear-gradient(135deg, 
-        rgba(45, 27, 20, 0.8) 0%, 
-        rgba(93, 64, 55, 0.6) 100%);
+    background: rgba(45, 27, 20, 0.8);
     display: flex;
     align-items: center;
     gap: 15px;
@@ -296,9 +270,7 @@ body {
 }
 
 .sidebar .profile-section:hover {
-    background: linear-gradient(135deg, 
-        rgba(45, 27, 20, 0.9) 0%, 
-        rgba(93, 64, 55, 0.7) 100%);
+    background: rgba(45, 27, 20, 0.9);
     transform: translateY(-1px);
     box-shadow: var(--shadow-medium);
 }
@@ -307,9 +279,7 @@ body {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: linear-gradient(135deg, 
-        var(--golden-highlight) 0%, 
-        var(--chocolate-accent) 100%);
+    background: var(--golden-highlight);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -325,7 +295,6 @@ body {
 .sidebar .profile-avatar::before {
     content: 'M';
     font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .sidebar .profile-avatar::after {
@@ -350,16 +319,13 @@ body {
     font-size: 16px;
     color: var(--warm-cream);
     margin-bottom: 4px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .sidebar .profile-info .profile-status {
     font-size: 12px;
     color: var(--chocolate-dark);
     padding: 4px 12px;
-    background: linear-gradient(135deg, 
-        var(--golden-highlight) 0%, 
-        var(--chocolate-cream) 100%);
+    background: var(--golden-highlight);
     border-radius: 15px;
     display: inline-block;
     font-weight: 500;
@@ -545,7 +511,7 @@ body {
     color: var(--warm-cream);
     padding: 30px;
     border-radius: 20px;
-    margin-bottom: 30px;
+    margin-bottom: 5px;
     box-shadow: var(--shadow-soft);
     border: 2px solid var(--chocolate-accent);
     backdrop-filter: blur(10px);
@@ -762,7 +728,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem 1.5rem 1rem;
+    padding: 1rem 1.5rem 0.75rem;
     border-bottom: 1px solid #f1f5f9;
 }
 
@@ -814,7 +780,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem;
+    padding: 1rem 1.5rem;
     border-bottom: 1px solid #f1f5f9;
 }
 
@@ -1289,14 +1255,42 @@ body {
     pointer-events: none;
 }
 
+/* Ensure ring charts always display horizontally */
 .main-metrics {
-    display: flex;
-    gap: 3rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: 0;
-    padding: 2rem 0;
-    position: relative;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between;
+    align-items: center;
+    gap: 25px;
+    margin-bottom: 40px;
+    padding: 30px 0;
+    min-height: 220px;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+    max-width: 100%;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(245, 245, 220, 0.95) 100%);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--chocolate-accent);
+    box-shadow: var(--shadow-soft);
+    transition: all 0.3s ease;
+}
+
+/* Container for ring charts to ensure proper horizontal layout */
+.main-metrics-container {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 .main-metrics::before {
@@ -1311,58 +1305,18 @@ body {
 
 .metric-ring {
     position: relative;
-    width: 200px;
-    height: 200px;
+    width: 220px;
+    height: 220px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border-radius: 50%;
-    box-shadow: 
-        0 10px 25px -5px rgba(0, 0, 0, 0.1),
-        0 4px 6px -2px rgba(0, 0, 0, 0.05),
-        inset 0 1px 0 rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
-}
-
-.metric-ring::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(45deg, #3b82f6, #10b981, #f59e0b, #ef4444);
-    border-radius: 50%;
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.metric-ring:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 
-        0 20px 40px -10px rgba(0, 0, 0, 0.15),
-        0 8px 12px -4px rgba(0, 0, 0, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-.metric-ring:hover::before {
-    opacity: 0.1;
-}
-
-.metric-ring:nth-child(1)::before {
-    background: linear-gradient(45deg, #3b82f6, #1d4ed8);
-}
-
-.metric-ring:nth-child(2)::before {
-    background: linear-gradient(45deg, #10b981, #059669);
-}
-
-.metric-ring:nth-child(3)::before {
-    background: linear-gradient(45deg, #f59e0b, #d97706);
+    background: transparent !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    margin: 0 8px;
+    min-width: 220px;
+    cursor: pointer;
 }
 
 .metric-ring canvas {
@@ -1371,50 +1325,83 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    border-radius: 50%;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    z-index: 1;
+    background: transparent !important;
 }
 
 .ring-center {
     text-align: center;
-    z-index: 1;
-    position: relative;
+    z-index: 2;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    background: transparent !important;
 }
 
 .ring-center::before {
-    content: '';
-    position: absolute;
-    top: -10px;
-    left: -10px;
-    right: -10px;
-    bottom: -10px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, transparent 70%);
-    border-radius: 50%;
-    z-index: -1;
+    display: none;
 }
 
 .ring-number {
-    font-size: 2.8rem;
-    font-weight: 800;
-    color: #1e293b;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #ffffff;
     line-height: 1.1;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    margin-bottom: 0.25rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    margin-bottom: 0.3rem;
     display: block;
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    transition: all 0.3s ease;
+}
+
+.metric-ring:hover .ring-number {
+    transform: scale(1.1);
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .ring-label {
-    font-size: 0.85rem;
-    color: #64748b;
+    font-size: 0.8rem;
+    color: #ffffff;
     text-transform: uppercase;
     letter-spacing: 0.1em;
+    font-weight: 700;
+    margin: 0 0 0.2rem 0;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    line-height: 1.2;
+}
+
+.metric-ring:hover .ring-label {
+    color: #ffffff;
+    transform: scale(1.05);
+    opacity: 1;
+}
+
+.ring-subtitle {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.8);
     font-weight: 600;
-    margin: 0;
+    margin-top: 0.2rem;
     opacity: 0.8;
+    transition: all 0.3s ease;
+    padding: 3px 6px;
+    background: transparent;
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    line-height: 1.2;
+    display: inline-block;
+}
+
+.metric-ring:hover .ring-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    background: transparent;
+    transform: scale(1.05);
+    opacity: 1;
 }
 
 /* Add subtle animation for ring charts */
@@ -1449,12 +1436,23 @@ body {
 /* Responsive adjustments for ring charts */
 @media (max-width: 768px) {
     .main-metrics {
-        gap: 1rem;
+        gap: 20px;
+        padding: 25px 0;
+        min-height: 180px;
+        flex-wrap: nowrap !important;
+        border-radius: 15px;
+    }
+    
+    .main-metrics-container {
+        gap: 20px;
+        padding: 0 15px;
     }
     
     .metric-ring {
         width: 160px;
         height: 160px;
+        margin: 0 5px;
+        min-width: 160px;
     }
     
     .ring-number {
@@ -1462,23 +1460,49 @@ body {
     }
     
     .ring-label {
-        font-size: 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .ring-subtitle {
+        font-size: 0.7rem;
+        padding: 3px 6px;
     }
 }
 
 @media (max-width: 480px) {
     .main-metrics {
-        flex-direction: column;
+        flex-direction: row !important;
         align-items: center;
+        gap: 15px;
+        min-height: 140px;
+        padding: 20px 0;
+        flex-wrap: nowrap !important;
+        border-radius: 12px;
+    }
+    
+    .main-metrics-container {
+        gap: 15px;
+        padding: 0 10px;
     }
     
     .metric-ring {
-        width: 140px;
-        height: 140px;
+        width: 120px;
+        height: 120px;
+        margin: 0 3px;
+        min-width: 120px;
     }
     
     .ring-number {
         font-size: 1.8rem;
+    }
+    
+    .ring-label {
+        font-size: 0.7rem;
+    }
+    
+    .ring-subtitle {
+        font-size: 0.6rem;
+        padding: 2px 4px;
     }
 }
 
@@ -2082,9 +2106,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 15px;
     border-bottom: 1px solid #eee;
-    padding-bottom: 20px;
+    padding-bottom: 10px;
 }
 
 .header h1 {
@@ -2177,8 +2201,8 @@ body {
     font-size: 1.5em;
     font-weight: bold;
     color: #2c3e50;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
     border-bottom: 1px solid #eee;
 }
 

@@ -1,17 +1,77 @@
 {% extends "sneat/base.html" %}
 
+{% block extra_head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/sneat.css') }}" rel="stylesheet">
+<style>
+    /* Enhanced chart container styles */
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+    
+    .chart-container canvas {
+        max-height: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    /* Ensure proper chart rendering */
+    .chart-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    
+    .chart-card.full-width {
+        grid-column: 1 / -1;
+    }
+    
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+    
+    .chart-actions .btn.active {
+        background: #007bff;
+        color: white;
+    }
+    
+    /* Loading state for charts */
+    .chart-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 300px;
+        color: #666;
+        font-size: 14px;
+    }
+    
+    .chart-loading.hidden {
+        display: none;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
     <div class="header">
         <div class="header-left">
             <h1>AI Services Dashboard</h1>
-            <div class="header-subtitle">Monitor and manage AI-powered services in real-time</div>
+            <div class="header-subtitle">Monitor transcription, translation, and classification performance</div>
         </div>
         <div class="header-right">
-            <button class="btn btn-primary" onclick="openServiceConfig()">
-                <i class="fas fa-cog"></i> Configure Services
+            <button class="btn btn-outline-primary" onclick="refreshDashboard()">
+                <i class="fas fa-sync-alt"></i> Refresh
             </button>
-            <button class="btn btn-outline-primary" onclick="exportAIData()">
-                <i class="fas fa-download"></i> Export Data
+            <button class="btn btn-primary" onclick="exportAIData()">
+                <i class="fas fa-download"></i> Export Report
             </button>
         </div>
     </div>
@@ -20,29 +80,20 @@
     <div class="quick-actions">
         <div class="search-box">
             <i class="fas fa-search"></i>
-            <input type="text" id="serviceSearch" placeholder="Search services...">
+            <input type="text" id="aiSearch" placeholder="Search AI services...">
         </div>
         <div class="filter-group">
-            <select id="serviceTypeFilter" class="filter-select">
-                <option value="">All Services</option>
+            <select id="serviceFilter" class="filter-select">
+                <option value="all">All Services</option>
                 <option value="transcription">Transcription</option>
                 <option value="translation">Translation</option>
                 <option value="classification">Classification</option>
-                <option value="analytics">Analytics</option>
-            </select>
-            <select id="statusFilter" class="filter-select">
-                <option value="">All Statuses</option>
-                <option value="active">Active</option>
-                <option value="idle">Idle</option>
-                <option value="error">Error</option>
-                <option value="maintenance">Maintenance</option>
             </select>
             <select id="timeFilter" class="filter-select">
                 <option value="today">Today</option>
-                <option value="week">This Week</option>
+                <option value="week" selected>This Week</option>
                 <option value="month">This Month</option>
                 <option value="quarter">This Quarter</option>
-                <option value="year">This Year</option>
             </select>
         </div>
     </div>
@@ -51,229 +102,205 @@
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon">🎤</div>
-            <div class="stat-label">Total Transcriptions</div>
-            <div class="stat-value" id="totalTranscriptions">0</div>
-            <div class="stat-change stat-positive">↗ +12.3%</div>
+            <div class="stat-label">Transcription Accuracy</div>
+            <div class="stat-value" id="transcriptionAccuracy">95.8%</div>
+            <div class="stat-change stat-positive">↗ +2.1%</div>
             <div class="stat-footer">
-                <span class="stat-footer-label">Success Rate:</span>
-                <span class="stat-footer-value" id="transcriptionSuccessRate">0%</span>
+                <span class="stat-footer-label">Processed:</span>
+                <span class="stat-footer-value" id="transcriptionCount">1,247</span>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon">🌐</div>
             <div class="stat-label">Translation Volume</div>
-            <div class="stat-value" id="translationVolume">0</div>
-            <div class="stat-change stat-positive">↗ +8.2%</div>
+            <div class="stat-value" id="translationVolume">856</div>
+            <div class="stat-change stat-positive">↗ +5.3%</div>
             <div class="stat-footer">
                 <span class="stat-footer-label">Languages:</span>
-                <span class="stat-footer-value" id="supportedLanguages">0</span>
+                <span class="stat-footer-value" id="languageCount">12</span>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon">🏷️</div>
-            <div class="stat-label">Classification Accuracy</div>
-            <div class="stat-value" id="classificationAccuracy">0%</div>
-            <div class="stat-change stat-positive">↗ +2.1%</div>
+            <div class="stat-label">Classification Precision</div>
+            <div class="stat-value" id="classificationPrecision">92.4%</div>
+            <div class="stat-change stat-positive">↗ +1.8%</div>
             <div class="stat-footer">
                 <span class="stat-footer-label">Categories:</span>
-                <span class="stat-footer-value" id="totalCategories">0</span>
+                <span class="stat-footer-value" id="categoryCount">24</span>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon">⚡</div>
-            <div class="stat-label">Average Response Time</div>
-            <div class="stat-value" id="avgResponseTime">0s</div>
+            <div class="stat-label">Avg Processing Time</div>
+            <div class="stat-value" id="avgProcessingTime">1.2s</div>
             <div class="stat-change stat-positive">↓ -15%</div>
             <div class="stat-footer">
                 <span class="stat-footer-label">Peak Load:</span>
-                <span class="stat-footer-value" id="peakLoad">0%</span>
+                <span class="stat-footer-value" id="peakLoad">78%</span>
             </div>
         </div>
     </div>
 
-    <!-- Dashboard Grid -->
+    <!-- Main Dashboard Content -->
     <div class="dashboard-grid">
-        <!-- Service Performance -->
-        <div class="dashboard-card">
-            <div class="card-header">
-                <h3>Service Performance</h3>
-                <div class="card-actions">
-                    <button class="btn btn-link" onclick="refreshPerformanceChart()">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                    <button class="btn btn-link" onclick="togglePerformanceView()">
-                        <i class="fas fa-expand"></i>
-                    </button>
+        <!-- AI Performance Trends -->
+        <div class="chart-card full-width">
+            <div class="chart-header">
+                <h3>AI Service Performance</h3>
+                <div class="chart-actions">
+                    <button class="btn btn-sm btn-outline-secondary active" data-view="accuracy" onclick="switchPerformanceView('accuracy', this)">Accuracy</button>
+                    <button class="btn btn-sm btn-outline-secondary" data-view="volume" onclick="switchPerformanceView('volume', this)">Volume</button>
+                    <button class="btn btn-sm btn-outline-secondary" data-view="time" onclick="switchPerformanceView('time', this)">Processing Time</button>
                 </div>
             </div>
-            <div class="card-body">
-                <canvas id="performanceChart"></canvas>
+            <div class="chart-container">
+                <div class="chart-loading" id="performanceLoading">Loading chart...</div>
+                <canvas id="performanceChart" style="display: none;"></canvas>
             </div>
         </div>
 
         <!-- Service Distribution -->
-        <div class="dashboard-card">
-            <div class="card-header">
+        <div class="chart-card">
+            <div class="chart-header">
                 <h3>Service Distribution</h3>
-                <div class="card-actions">
-                    <button class="btn btn-link" onclick="refreshDistributionChart()">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
+                <div class="chart-actions">
+                    <select class="filter-select" id="distributionType" onchange="updateDistributionChart()">
+                        <option value="requests">By Requests</option>
+                        <option value="languages">By Languages</option>
+                        <option value="categories">By Categories</option>
+                    </select>
                 </div>
             </div>
-            <div class="card-body">
-                <canvas id="distributionChart"></canvas>
+            <div class="chart-container">
+                <div class="chart-loading" id="distributionLoading">Loading chart...</div>
+                <canvas id="distributionChart" style="display: none;"></canvas>
             </div>
         </div>
 
         <!-- Service Health -->
-        <div class="dashboard-card">
-            <div class="card-header">
+        <div class="chart-card">
+            <div class="chart-header">
                 <h3>Service Health</h3>
-                <div class="card-actions">
-                    <button class="btn btn-link" onclick="refreshHealthStatus()">
+                <div class="chart-actions">
+                    <button class="btn btn-sm btn-link" onclick="refreshHealth()">
                         <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="health-status">
-                    <div class="health-item">
-                        <div class="health-icon transcription">🎤</div>
-                        <div class="health-info">
-                            <div class="health-title">Transcription Service</div>
-                            <div class="health-metrics">
-                                <span class="health-status-badge active">Active</span>
-                                <span class="health-uptime">99.9% Uptime</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="health-item">
-                        <div class="health-icon translation">🌐</div>
-                        <div class="health-info">
-                            <div class="health-title">Translation Service</div>
-                            <div class="health-metrics">
-                                <span class="health-status-badge active">Active</span>
-                                <span class="health-uptime">99.8% Uptime</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="health-item">
-                        <div class="health-icon classification">🏷️</div>
-                        <div class="health-info">
-                            <div class="health-title">Classification Service</div>
-                            <div class="health-metrics">
-                                <span class="health-status-badge active">Active</span>
-                                <span class="health-uptime">99.7% Uptime</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="health-item">
-                        <div class="health-icon analytics">📊</div>
-                        <div class="health-info">
-                            <div class="health-title">Analytics Service</div>
-                            <div class="health-metrics">
-                                <span class="health-status-badge active">Active</span>
-                                <span class="health-uptime">99.6% Uptime</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="dashboard-card">
-            <div class="card-header">
-                <h3>Recent Activity</h3>
-                <div class="card-actions">
-                    <button class="btn btn-link" onclick="refreshActivity()">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="activity-list" id="activityList">
-                    <!-- Activity items will be populated dynamically -->
-                </div>
+            <div class="chart-container">
+                <div class="chart-loading" id="healthLoading">Loading chart...</div>
+                <canvas id="healthChart" style="display: none;"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- Service Table -->
-    <div class="table-section">
-        <div class="table-header">
-            <h3>Service Details</h3>
+    <!-- Recent AI Processing -->
+    <div class="table-card">
+        <div class="card-header">
+            <h3>Recent AI Processing</h3>
             <div class="table-actions">
-                <button class="btn btn-link" onclick="refreshTable()">
-                    <i class="fas fa-sync-alt"></i> Refresh
+                <button class="btn btn-sm btn-outline-secondary" onclick="refreshTable()">
+                    <i class="fas fa-sync-alt"></i>
                 </button>
-                <button class="btn btn-link" onclick="toggleColumns()">
-                    <i class="fas fa-columns"></i> Columns
+                <button class="btn btn-sm btn-outline-secondary" onclick="toggleColumns()">
+                    <i class="fas fa-columns"></i>
                 </button>
             </div>
         </div>
-        <div class="table-container">
-            <table class="data-table" id="serviceTable">
+        <div class="table-responsive">
+            <table class="table" id="aiTable">
                 <thead>
                     <tr>
+                        <th>ID</th>
                         <th>Service</th>
+                        <th>Input</th>
+                        <th>Output</th>
+                        <th>Confidence</th>
+                        <th>Processing Time</th>
                         <th>Status</th>
-                        <th>Requests</th>
-                        <th>Success Rate</th>
-                        <th>Response Time</th>
-                        <th>Last Updated</th>
-                        <th>Actions</th>
+                        <th>Timestamp</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Table data will be populated dynamically -->
+                    <!-- Sample rows -->
+                    <tr>
+                        <td>TR-7845</td>
+                        <td>Transcription</td>
+                        <td>Audio_2023-06-15.mp3</td>
+                        <td>92% match</td>
+                        <td>98.5%</td>
+                        <td>1.4s</td>
+                        <td><span class="badge bg-success">Success</span></td>
+                        <td>2 min ago</td>
+                    </tr>
+                    <tr>
+                        <td>TL-5623</td>
+                        <td>Translation</td>
+                        <td>French to English</td>
+                        <td>89% accuracy</td>
+                        <td>95.2%</td>
+                        <td>2.1s</td>
+                        <td><span class="badge bg-success">Success</span></td>
+                        <td>5 min ago</td>
+                    </tr>
+                    <tr>
+                        <td>CL-9012</td>
+                        <td>Classification</td>
+                        <td>Support ticket #4512</td>
+                        <td>Technical/Software</td>
+                        <td>91.7%</td>
+                        <td>0.8s</td>
+                        <td><span class="badge bg-success">Success</span></td>
+                        <td>12 min ago</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
-        <div class="table-pagination">
-            <button class="btn btn-link" onclick="previousPage()">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <span id="pageInfo">Page 1 of 1</span>
-            <button class="btn btn-link" onclick="nextPage()">
-                <i class="fas fa-chevron-right"></i>
-            </button>
+        <div class="table-footer">
+            <div class="table-info">
+                Showing <span id="tableStart">1</span> to <span id="tableEnd">10</span> of <span id="tableTotal">0</span> items
+            </div>
+            <div class="pagination" id="tablePagination">
+                <!-- Pagination will be dynamically added here -->
+            </div>
         </div>
     </div>
 {% endblock %}
 
-{% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sneat.js') }}"></script>
 <script>
-// Initialize charts with sample data
-function initializeCharts() {
-    // Performance Chart
-    const performanceCtx = document.getElementById('performanceChart').getContext('2d');
-    window.performanceChart = new Chart(performanceCtx, {
-        type: 'line',
-        data: {
+// Global chart instances
+let performanceChart = null;
+let distributionChart = null;
+let healthChart = null;
+
+// Chart data
+const chartData = {
+    performance: {
+        accuracy: {
             labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
             datasets: [
                 {
-                    label: 'Transcription',
-                    data: [120, 150, 180, 200, 220, 250],
+                    label: 'Transcription Accuracy',
+                    data: [92.1, 93.5, 94.2, 94.8, 95.3, 95.8],
                     borderColor: '#3b82f6',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     tension: 0.4,
                     fill: true
                 },
                 {
-                    label: 'Translation',
-                    data: [80, 100, 120, 140, 160, 180],
+                    label: 'Translation Accuracy',
+                    data: [88.5, 89.2, 90.1, 91.4, 92.0, 92.7],
                     borderColor: '#10b981',
                     backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     tension: 0.4,
                     fill: true
                 },
                 {
-                    label: 'Classification',
-                    data: [60, 75, 90, 105, 120, 135],
+                    label: 'Classification Precision',
+                    data: [89.2, 90.1, 90.8, 91.5, 92.0, 92.4],
                     borderColor: '#f59e0b',
                     backgroundColor: 'rgba(245, 158, 11, 0.1)',
                     tension: 0.4,
@@ -281,16 +308,128 @@ function initializeCharts() {
                 }
             ]
         },
+        volume: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [
+                {
+                    label: 'Transcription Volume',
+                    data: [1120, 1180, 1205, 1230, 1240, 1247],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Translation Volume',
+                    data: [780, 810, 825, 840, 850, 856],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Classification Volume',
+                    data: [890, 900, 915, 920, 925, 932],
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        time: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [
+                {
+                    label: 'Transcription Time (ms)',
+                    data: [1800, 1650, 1500, 1400, 1350, 1200],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Translation Time (ms)',
+                    data: [2500, 2400, 2300, 2200, 2150, 2100],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Classification Time (ms)',
+                    data: [1200, 1100, 950, 900, 850, 800],
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        }
+    },
+    distribution: {
+        requests: {
+            labels: ['Transcription', 'Translation', 'Classification'],
+            data: [1247, 856, 932]
+        },
+        languages: {
+            labels: ['English', 'Spanish', 'French', 'German', 'Chinese'],
+            data: [450, 320, 280, 180, 120]
+        },
+        categories: {
+            labels: ['Technical', 'Support', 'Sales', 'HR', 'Marketing'],
+            data: [380, 290, 220, 180, 150]
+        }
+    }
+};
+
+// Initialize charts when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js is not loaded properly');
+        return;
+    }
+
+    // Add a delay to ensure DOM is fully rendered
+    setTimeout(initializeCharts, 100);
+});
+
+function initializeCharts() {
+    try {
+        initPerformanceChart();
+        initDistributionChart();
+        initHealthChart();
+        console.log('All charts initialized successfully');
+    } catch (error) {
+        console.error('Error initializing charts:', error);
+    }
+}
+
+function initPerformanceChart() {
+    const canvas = document.getElementById('performanceChart');
+    const loading = document.getElementById('performanceLoading');
+    
+    if (!canvas) {
+        console.error('Performance chart canvas not found');
+        return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    
+    performanceChart = new Chart(ctx, {
+        type: 'line',
+        data: chartData.performance.accuracy,
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
             plugins: {
                 legend: {
                     position: 'top',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 20
-                    }
                 },
                 tooltip: {
                     mode: 'index',
@@ -299,46 +438,52 @@ function initializeCharts() {
             },
             scales: {
                 y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)'
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false
+                    beginAtZero: false,
+                    min: 85,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
                     }
                 }
-            },
-            interaction: {
-                mode: 'nearest',
-                axis: 'x',
-                intersect: false
             }
         }
     });
 
-    // Distribution Chart
-    const distributionCtx = document.getElementById('distributionChart').getContext('2d');
-    window.distributionChart = new Chart(distributionCtx, {
+    // Show chart, hide loading
+    canvas.style.display = 'block';
+    loading.classList.add('hidden');
+}
+
+function initDistributionChart() {
+    const canvas = document.getElementById('distributionChart');
+    const loading = document.getElementById('distributionLoading');
+    
+    if (!canvas) {
+        console.error('Distribution chart canvas not found');
+        return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    
+    distributionChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Transcription', 'Translation', 'Classification', 'Analytics'],
+            labels: chartData.distribution.requests.labels,
             datasets: [{
-                data: [40, 25, 20, 15],
+                data: chartData.distribution.requests.data,
                 backgroundColor: [
                     'rgba(59, 130, 246, 0.8)',
                     'rgba(16, 185, 129, 0.8)',
-                    'rgba(245, 158, 11, 0.8)',
-                    'rgba(99, 102, 241, 0.8)'
+                    'rgba(245, 158, 11, 0.8)'
                 ],
                 borderColor: [
                     'rgba(59, 130, 246, 1)',
                     'rgba(16, 185, 129, 1)',
-                    'rgba(245, 158, 11, 1)',
-                    'rgba(99, 102, 241, 1)'
+                    'rgba(245, 158, 11, 1)'
                 ],
-                borderWidth: 1
+                borderWidth: 2
             }]
         },
         options: {
@@ -346,11 +491,7 @@ function initializeCharts() {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'right',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 20
-                    }
+                    position: 'bottom',
                 },
                 tooltip: {
                     callbacks: {
@@ -367,241 +508,177 @@ function initializeCharts() {
             cutout: '60%'
         }
     });
+
+    // Show chart, hide loading
+    canvas.style.display = 'block';
+    loading.classList.add('hidden');
 }
 
-// Load service data with sample data
-function loadServiceData() {
-    // Update metrics with sample data
-    document.getElementById('totalTranscriptions').textContent = '1,234';
-    document.getElementById('transcriptionSuccessRate').textContent = '98.5%';
-    document.getElementById('translationVolume').textContent = '856';
-    document.getElementById('supportedLanguages').textContent = '12';
-    document.getElementById('classificationAccuracy').textContent = '95.2%';
-    document.getElementById('totalCategories').textContent = '24';
-    document.getElementById('avgResponseTime').textContent = '0.8s';
-    document.getElementById('peakLoad').textContent = '75%';
+function initHealthChart() {
+    const canvas = document.getElementById('healthChart');
+    const loading = document.getElementById('healthLoading');
+    
+    if (!canvas) {
+        console.error('Health chart canvas not found');
+        return;
+    }
 
-    // Update activity list with sample data
-    const activityList = document.getElementById('activityList');
-    const activities = [
-        { service: 'Transcription', action: 'Completed batch processing', time: '2 minutes ago' },
-        { service: 'Translation', action: 'Updated language models', time: '15 minutes ago' },
-        { service: 'Classification', action: 'Improved accuracy by 2.1%', time: '1 hour ago' },
-        { service: 'Analytics', action: 'Generated monthly report', time: '2 hours ago' }
+    const ctx = canvas.getContext('2d');
+    
+    healthChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Uptime', 'Success Rate', 'Avg Load'],
+            datasets: [
+                {
+                    label: 'Transcription',
+                    data: [99.8, 98.5, 65],
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)'
+                },
+                {
+                    label: 'Translation',
+                    data: [99.6, 97.8, 58],
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)'
+                },
+                {
+                    label: 'Classification',
+                    data: [99.7, 96.2, 72],
+                    backgroundColor: 'rgba(245, 158, 11, 0.8)'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Show chart, hide loading
+    canvas.style.display = 'block';
+    loading.classList.add('hidden');
+}
+
+// Chart interaction functions
+function switchPerformanceView(view, button) {
+    if (!performanceChart) return;
+    
+    // Update button states
+    document.querySelectorAll('[data-view]').forEach(btn => btn.classList.remove('active'));
+    button.classList.add('active');
+    
+    // Update chart data
+    performanceChart.data = chartData.performance[view];
+    
+    // Update Y-axis scale based on view
+    if (view === 'time') {
+        performanceChart.options.scales.y.min = 0;
+        performanceChart.options.scales.y.max = 3000;
+        performanceChart.options.scales.y.ticks.callback = function(value) {
+            return value + 'ms';
+        };
+    } else if (view === 'volume') {
+        performanceChart.options.scales.y.min = 0;
+        performanceChart.options.scales.y.max = 1500;
+        performanceChart.options.scales.y.ticks.callback = function(value) {
+            return value;
+        };
+    } else {
+        performanceChart.options.scales.y.min = 85;
+        performanceChart.options.scales.y.max = 100;
+        performanceChart.options.scales.y.ticks.callback = function(value) {
+            return value + '%';
+        };
+    }
+    
+    performanceChart.update('active');
+}
+
+function updateDistributionChart() {
+    if (!distributionChart) return;
+    
+    const type = document.getElementById('distributionType').value;
+    const newData = chartData.distribution[type];
+    
+    distributionChart.data.labels = newData.labels;
+    distributionChart.data.datasets[0].data = newData.data;
+    
+    // Update colors based on data length
+    const colors = [
+        'rgba(59, 130, 246, 0.8)',
+        'rgba(16, 185, 129, 0.8)',
+        'rgba(245, 158, 11, 0.8)',
+        'rgba(239, 68, 68, 0.8)',
+        'rgba(139, 92, 246, 0.8)'
     ];
-
-    activityList.innerHTML = activities.map(activity => `
-        <div class="activity-item">
-            <div class="activity-icon">${getServiceIcon(activity.service)}</div>
-            <div class="activity-content">
-                <div class="activity-title">${activity.service}</div>
-                <div class="activity-description">${activity.action}</div>
-                <div class="activity-time">${activity.time}</div>
-            </div>
-        </div>
-    `).join('');
-
-    // Update service table with sample data
-    const serviceTable = document.getElementById('serviceTable').getElementsByTagName('tbody')[0];
-    const services = [
-        { name: 'Transcription Service', status: 'active', requests: '1,234', success: '98.5%', response: '0.5s', updated: '2 min ago' },
-        { name: 'Translation Service', status: 'active', requests: '856', success: '97.8%', response: '0.8s', updated: '5 min ago' },
-        { name: 'Classification Service', status: 'active', requests: '2,345', success: '95.2%', response: '0.3s', updated: '1 min ago' },
-        { name: 'Analytics Service', status: 'active', requests: '567', success: '99.1%', response: '1.2s', updated: '10 min ago' }
-    ];
-
-    serviceTable.innerHTML = services.map(service => `
-        <tr>
-            <td>${service.name}</td>
-            <td><span class="status-badge ${service.status}">${service.status}</span></td>
-            <td>${service.requests}</td>
-            <td>${service.success}</td>
-            <td>${service.response}</td>
-            <td>${service.updated}</td>
-            <td>
-                <div class="table-actions">
-                    <button class="action-btn" onclick="viewServiceDetails('${service.name}')">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="action-btn" onclick="editService('${service.name}')">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
-}
-
-// Utility function to get service icon
-function getServiceIcon(service) {
-    const icons = {
-        'Transcription': '🎤',
-        'Translation': '🌐',
-        'Classification': '🏷️',
-        'Analytics': '📊'
-    };
-    return icons[service] || '🤖';
-}
-
-// Setup event listeners
-function setupEventListeners() {
-    // Search functionality
-    const searchInput = document.getElementById('serviceSearch');
-    searchInput.addEventListener('input', debounce((e) => {
-        filterServices(e.target.value);
-    }, 300));
-
-    // Filter functionality
-    document.getElementById('serviceTypeFilter').addEventListener('change', filterServices);
-    document.getElementById('statusFilter').addEventListener('change', filterServices);
-    document.getElementById('timeFilter').addEventListener('change', updateTimeRange);
-}
-
-// Start real-time updates
-function startRealTimeUpdates() {
-    // Update dashboard every 30 seconds
-    setInterval(updateDashboard, 30000);
+    
+    distributionChart.data.datasets[0].backgroundColor = colors.slice(0, newData.data.length);
+    distributionChart.data.datasets[0].borderColor = colors.slice(0, newData.data.length).map(color => 
+        color.replace('0.8', '1')
+    );
+    
+    distributionChart.update('active');
 }
 
 // Utility functions
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-function filterServices(query = '') {
-    // Implement service filtering logic
-    console.log('Filtering services with query:', query);
-}
-
-function updateTimeRange() {
-    // Implement time range update logic
-    console.log('Updating time range...');
-}
-
-function refreshPerformanceChart() {
-    // Implement performance chart refresh logic
-    console.log('Refreshing performance chart...');
-}
-
-function refreshDistributionChart() {
-    // Implement distribution chart refresh logic
-    console.log('Refreshing distribution chart...');
-}
-
-function refreshHealthStatus() {
-    // Implement health status refresh logic
-    console.log('Refreshing health status...');
-}
-
-function refreshActivity() {
-    // Implement activity refresh logic
-    console.log('Refreshing activity...');
-}
-
-function refreshTable() {
-    // Implement table refresh logic
-    console.log('Refreshing table...');
-}
-
-function toggleColumns() {
-    // Implement column visibility toggle logic
-    console.log('Toggling columns...');
-}
-
-function openServiceConfig() {
-    // Implement service configuration opening logic
-    console.log('Opening service configuration...');
+function refreshDashboard() {
+    console.log("Refreshing dashboard data...");
+    // Show loading states
+    document.querySelectorAll('.chart-loading').forEach(loading => {
+        loading.classList.remove('hidden');
+    });
+    document.querySelectorAll('canvas').forEach(canvas => {
+        canvas.style.display = 'none';
+    });
+    
+    // Simulate data refresh
+    setTimeout(() => {
+        initializeCharts();
+    }, 1000);
 }
 
 function exportAIData() {
-    // Implement AI data export logic
-    console.log('Exporting AI data...');
+    console.log("Exporting AI service data...");
+    // Implement export functionality
+    alert('Export functionality would be implemented here');
 }
 
-function updateDashboard() {
-    // Implement dashboard update logic
-    console.log('Updating dashboard...');
+function refreshHealth() {
+    console.log("Refreshing health metrics...");
+    if (healthChart) {
+        // Simulate new health data
+        const newData = [
+            [99.9, 98.8, 67],
+            [99.7, 98.1, 61], 
+            [99.8, 96.8, 74]
+        ];
+        
+        healthChart.data.datasets.forEach((dataset, index) => {
+            dataset.data = newData[index];
+        });
+        
+        healthChart.update('active');
+    }
 }
 
-// Initialize dashboard with a slight delay to ensure DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        initializeCharts();
-        loadServiceData();
-        setupEventListeners();
-        startRealTimeUpdates();
-    }, 100);
-});
+function refreshTable() {
+    console.log("Refreshing AI processing table...");
+    // Implement table refresh
+}
+
+function toggleColumns() {
+    console.log("Toggling table columns...");
+    // Implement column toggle
+}
 </script>
-{% endblock %}
-
-{% block styles %}
-<style>
-.chart-container {
-    position: relative;
-    height: 300px;
-    width: 100%;
-    margin: 0 auto;
-}
-
-.card-body {
-    padding: 1.5rem;
-}
-
-.activity-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.activity-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    padding: 1rem;
-    background: #f8fafc;
-    border-radius: 0.5rem;
-}
-
-.activity-icon {
-    font-size: 1.5rem;
-    width: 2.5rem;
-    height: 2.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: white;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.activity-content {
-    flex: 1;
-}
-
-.activity-title {
-    font-weight: 500;
-    color: #1e293b;
-}
-
-.activity-description {
-    color: #64748b;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-}
-
-.activity-time {
-    color: #94a3b8;
-    font-size: 0.75rem;
-    margin-top: 0.25rem;
-}
-</style>
 {% endblock %}
