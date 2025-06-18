@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>{{title}}</title>
+
+        <!-- plugins:css -->
+        <link href="{{ url_for('static', filename='corona/vendors/mdi/css/materialdesignicons.min.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='corona/vendors/ti-icons/css/themify-icons.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='corona/vendors/css/vendor.bundle.base.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='corona/vendors/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet">
+        <!-- endinject -->
+
+        {%- block csscripts -%}{%- endblock -%}
+
+        <!-- inject:css -->
+        <!-- endinject -->
+
+        <!-- Layout styles -->
+        <link href="{{ url_for('static', filename='corona/css/style.css') }}" rel="stylesheet">
+        <!-- End layout styles -->
+        <link rel="shortcut icon" href="{{ url_for('static', filename='corona/images/favicon.png') }}"/>
+    </head>
+
+    <body>
+        <div class="container-scroller">
+            <div class="row p-0 m-0 proBanner" id="proBanner">
+            {%- include "corona/banner.html" -%}
+            </div>
+
+            <!-- partial:sidebar -->
+            <nav class="sidebar sidebar-offcanvas" id="sidebar">
+            {%- include "corona/sidebar.html" -%}
+            </nav>
+            <!-- partial -->
+
+            <div class="container-fluid page-body-wrapper">
+                <!-- partial:navbar -->
+                {%- include "corona/navbar.html" -%}
+                <!-- partial -->
+
+                <div class="main-panel">
+                {%- block content -%}{%- endblock -%}
+
+                <!-- partial:partials/_footer.html -->
+                {%- include "corona/footer.html" -%}
+                <!-- partial -->
+
+                </div>
+                <!-- main-panel ends -->
+
+            </div>
+        <!-- page-body-wrapper ends -->
+        </div>
+
+        <!-- container-scroller -->
+        <!-- plugins:js -->
+        <script src="{{ url_for('static', filename='corona/vendors/js/vendor.bundle.base.js') }}"></script>
+        <!-- endinject -->
+
+        {%- block jscripts -%}{%- endblock -%}
+
+        {%- include "corona/jscript.html" -%}
+
+    </body>
+</html>

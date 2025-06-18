@@ -1,0 +1,61 @@
+<script>
+     const lockscreen = document.getElementById('lockScreen');
+    /**
+     * https://attacomsian.com/blog/xhr-json-post-request
+     * run some js to prefill id="userole" and id="avatar" on sidebar.html
+    
+    window.onload = function() {
+        yourFunction();
+    };
+    **/
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Your AJAX call function here
+        makeAjaxCall();
+    });
+
+    function makeAjaxCall() {
+        // Create XMLHttpRequest object
+        const xhr = new XMLHttpRequest();
+        const avatar = document.getElementById("avatar");
+        const userole = document.getElementById("userole");
+
+        // set `Content-Type` header
+        xhr.setRequestHeader('Content-Type', 'application/json')
+        
+        // Configure the request
+        xhr.open('POST', '/contacts/stats/userdata/sidebar');
+        // Set up a callback function for when the request completes
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                // Process the response data
+                console.log(xhr.responseText);
+
+                /**Fix This**/
+                avatar.innerHTML = xhr.avatar;
+                userole.innerHTML = xhr.userole;
+            } else {
+                // Handle errors
+                // lockscreen.click();
+                console.error('Request failed.  Returned status of ' + xhr.status);
+                }
+        };
+        // Handle network errors
+        xhr.onerror = function() {
+            console.error('Network error occurred');
+        };
+        // Send the request
+        xhr.send();
+    }
+
+    document.addEventListener('readystatechange', event => {
+        if (event.target.readyState === "interactive") {
+            // HTML/DOM elements are ready
+            yourFunction();
+        }
+        if (event.target.readyState === "complete") {
+            // Window and all resources are loaded
+            anotherFunction();
+        }
+    });
+</script>
